@@ -13,10 +13,12 @@
     <PackageReference Include="ConsoleTableExt" Version="2.0.2" />
     <PackageReference Include="LibGit2Sharp" Version="0.25.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Vanilla" Version="0.0.1-pre8" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="authors.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

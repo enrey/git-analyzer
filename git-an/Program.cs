@@ -1,15 +1,13 @@
-﻿using System;
+﻿using log4net;
+using log4net.Config;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using log4net;
-using log4net.Config;
 
 namespace git_an
 {
-
     internal class Program
     {
         private static readonly ILog Logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -29,7 +27,7 @@ namespace git_an
             var stopWatch = Stopwatch.StartNew();
             try
             {
-                /*await*/ git_an.Main.Work(args);
+                git_an.Main.Work(args);
             }
             catch (AggregateException ae)
             {
