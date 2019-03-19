@@ -2,17 +2,17 @@
 
 Analyze git history with simple command line for statistics.
 
-###Build
+### Build
 
 Visual Studio or command line
 
       dotnet build
 
-###Run sample:
+### Run sample:
 
       dotnet git-an.dll c:\path-to-my-git-repo
 
-###Notes
+### Notes
 authors.txt file must contain authors for deduplication, separated by comma.
 
 You also can specify dates for analyzing (default is 2018 year) in 'dd.MM.yyyy' format
