@@ -2,7 +2,13 @@
 
 Analyze git history with simple command line for statistics.
 
-Usage sample:
+Build
+
+Visual Studio or command line
+
+      dotnet build
+
+Run sample:
 
       dotnet git-an.dll c:\path-to-my-git-repo
 
