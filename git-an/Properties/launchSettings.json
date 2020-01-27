@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "git-an": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\GitAnalyzer\\Repos\\npa 01.12.2019 31.12.2019"
+    }
+  }
+}
