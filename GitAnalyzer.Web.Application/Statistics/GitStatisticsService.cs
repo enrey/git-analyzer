@@ -43,26 +43,37 @@ namespace GitAnalyzer.Web.Application.Statistics
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            UpdateAllRepositories();
+            await UpdateAllRepositories();
 
             var dates = GetDates(startDate, endDate);
 
+            var validRepos = _repositoriesConfig.ReposInfo
+                .Select(ri => new 
+                { 
+                    ri.Name,
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}"
+                })
+                .Where(ri => Repository.IsValid(ri.RepoPath));
+
             var result = new List<RepositoryStatisticsDto>();
 
-            Parallel.ForEach(_repositoriesConfig.ReposInfo,
-                ri =>
-                {
-                    var repoStatistics = new RepositoryStatisticsDto
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(validRepos,
+                    ri =>
                     {
-                        RepositoryName = ri.Name,
-                        Periods = GetStatisticsByDates($@"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}", dates)
-                    };
+                        var repoStatistics = new RepositoryStatisticsDto
+                        {
+                            RepositoryName = ri.Name,
+                            Periods = GetStatisticsByDates(ri.RepoPath, dates)
+                        };
 
-                    lock (_locker)
-                    {
-                        result.Add(repoStatistics);
-                    }
-                });
+                        lock (_locker)
+                        {
+                            result.Add(repoStatistics);
+                        }
+                    });
+            });
 
             return result.OrderBy(r => r.RepositoryName).ToList();
         }
@@ -70,7 +81,7 @@ namespace GitAnalyzer.Web.Application.Statistics
         /// <summary>
         /// Обновление всех репозиториев
         /// </summary>
-        public void UpdateAllRepositories()
+        public async Task UpdateAllRepositories()
         {
             var reposInfo = _repositoriesConfig.ReposInfo
                 .Select(info => new
@@ -83,13 +94,16 @@ namespace GitAnalyzer.Web.Application.Statistics
                         Password = info.Password
                     }
                 }).ToList();
-
-            Parallel.ForEach(reposInfo, info =>
+            
+            await Task.Run(() =>
             {
-                if (!Repository.IsValid(info.RepoPath))
-                    CloneRepository(info.RepoUrl, info.RepoPath, info.Credentials);
-                else
-                    FetchRepository(info.RepoPath, info.Credentials);
+                Parallel.ForEach(reposInfo, info =>
+                {
+                    if (!Repository.IsValid(info.RepoPath))
+                        CloneRepository(info.RepoUrl, info.RepoPath, info.Credentials);
+                    else
+                        PullRepository(info.RepoPath, info.Credentials);
+                });
             });
         }
 
@@ -106,7 +120,7 @@ namespace GitAnalyzer.Web.Application.Statistics
 
                 var cloneOptions = new CloneOptions
                 {
-                    IsBare = true,
+                    IsBare = false,
                     CredentialsProvider = (_url, _user, _cred) => credentials
                 };
 
@@ -152,6 +166,39 @@ namespace GitAnalyzer.Web.Application.Statistics
             catch (Exception ex)
             {
                 _logger.LogError($"Fetching error! Repository: \"{repoPath}\". Message: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Pull изменений репозитория
+        /// </summary>
+        private void PullRepository(string repoPath, UsernamePasswordCredentials credentials)
+        {
+            try
+            {
+                using var repo = new Repository(repoPath);
+
+                var pullOptions = new PullOptions
+                {
+                    FetchOptions = new FetchOptions
+                    {
+                        Prune = true,
+                        CredentialsProvider = (_url, _user, _cred) => credentials
+                    }
+                };
+
+                var signature = new Signature(
+                    new Identity("robotovya", "robotovya@it2g.ru"), DateTimeOffset.Now);
+
+                _logger.LogInformation($"Pulling started: \"{repoPath}\"");
+
+                Commands.Pull(repo, signature, pullOptions);
+
+                _logger.LogInformation($"Pulling ended: \"{repoPath}\"");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Pulling error! Repository: \"{repoPath}\". Message: {ex.Message}");
             }
         }
 

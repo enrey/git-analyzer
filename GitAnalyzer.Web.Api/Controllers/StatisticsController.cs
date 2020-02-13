@@ -46,5 +46,18 @@ namespace GitAnalyzer.Web.Api.Controllers
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Обновление GIT репозиториев
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("update-repositories")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UpdateRepositories()
+        {
+            await _gitStatisticsService.UpdateAllRepositories();
+
+            return NoContent();
+        }
     }
 }
