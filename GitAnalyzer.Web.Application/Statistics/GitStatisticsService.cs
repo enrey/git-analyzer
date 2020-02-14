@@ -43,17 +43,33 @@ namespace GitAnalyzer.Web.Application.Statistics
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            await UpdateAllRepositories();
-
             var dates = GetDates(startDate, endDate);
 
             var validRepos = _repositoriesConfig.ReposInfo
                 .Select(ri => new 
                 { 
                     ri.Name,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}"
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}",
+                    Credentials = new UsernamePasswordCredentials
+                    {
+                        Username = ri.Username,
+                        Password = ri.Password
+                    }
                 })
                 .Where(ri => Repository.IsValid(ri.RepoPath));
+
+            if (!validRepos.Any())
+                throw new Exception("Отсутствуют клонированные репозитории");
+
+
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(validRepos, vr =>
+                {
+                    PullRepository(vr.RepoPath, vr.Credentials);
+                });
+            });
+            
 
             var result = new List<RepositoryStatisticsDto>();
 
