@@ -204,7 +204,8 @@ namespace GitAnalyzer.Web.Application.Statistics
                 };
 
                 var signature = new Signature(
-                    new Identity("robotovya", "robotovya@it2g.ru"), DateTimeOffset.Now);
+                    new Identity(_repositoriesConfig.MergeUserName, _repositoriesConfig.MergeUserEmail), 
+                    DateTimeOffset.Now);
 
                 _logger.LogInformation($"Pulling started: \"{repoPath}\"");
 
