@@ -21,6 +21,6 @@ namespace GitAnalyzer.Web.Application.Statistics
         /// <summary>
         /// Обновление всех репозиториев
         /// </summary>
-        void UpdateAllRepositories();
+        Task UpdateAllRepositories();
     }
 }

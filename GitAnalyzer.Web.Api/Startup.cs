@@ -48,6 +48,8 @@ namespace GitAnalyzer.Web.Api
 
             services.Configure<StatisticsConfig>(Configuration.GetSection("Statistics"));
             services.Configure<RepositoriesConfig>(Configuration.GetSection("Repositories"));
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +59,9 @@ namespace GitAnalyzer.Web.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors(options =>
+                options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

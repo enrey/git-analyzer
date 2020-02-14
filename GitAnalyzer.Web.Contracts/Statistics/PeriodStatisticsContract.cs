@@ -11,7 +11,7 @@ namespace GitAnalyzer.Web.Contracts.Statistics
         /// <summary>
         /// Дата за которую собрана статистика
         /// </summary>
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
 
         /// <summary>
         /// Статистика по сотрудникам
