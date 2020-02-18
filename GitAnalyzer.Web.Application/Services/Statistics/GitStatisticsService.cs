@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Web.Application.Statistics
+namespace GitAnalyzer.Web.Application.Services.Statistics
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев

@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,3 +30,4 @@ namespace GitAnalyzer.Web.Api
                 });
     }
 }
+#pragma warning restore CS1591

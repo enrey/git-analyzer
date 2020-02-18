@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GitAnalyzer.Web.Application.Configuration;
 using GitAnalyzer.Web.Application.MapperProfiles;
-using GitAnalyzer.Web.Application.Statistics;
+using GitAnalyzer.Web.Application.Services.Statistics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;

@@ -1,11 +1,11 @@
 using GitAnalyzer.Web.Application.Configuration;
-using GitAnalyzer.Web.Application.Statistics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
+using GitAnalyzer.Web.Application.Services.Statistics;
 
 namespace GitAnalyzer.IntegrationTests
 {
@@ -23,7 +23,7 @@ namespace GitAnalyzer.IntegrationTests
             var repositoriesConfigMock = new Mock<IOptionsMonitor<RepositoriesConfig>>();
             repositoriesConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new RepositoriesConfig
             {
-                ReposFolder = "C:\\GitAnalyzer.Test\\Repos",
+                ReposFolder = "Test.Repos",
                 ReposInfo = new[]
                 {
                     new RepositoryInfoConfig
