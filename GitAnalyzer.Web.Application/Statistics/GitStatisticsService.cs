@@ -245,7 +245,10 @@ namespace GitAnalyzer.Web.Application.Statistics
 
             using var repo = new Repository(repositoryPath);
 
-            var filteredCommits = repo.Commits.Where(c =>
+            // iterate all branches (git log --all)
+            var filter = new CommitFilter { IncludeReachableFrom = repo.Branches };
+
+            var filteredCommits = repo.Commits.QueryBy(filter).Where(c =>
                 c.Parents.Count() == 1 &&
                 dates.Contains(c.Committer.When.Date)
             ).ToList();
