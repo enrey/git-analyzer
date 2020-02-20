@@ -49,7 +49,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                 .Select(ri => new 
                 { 
                     ri.Name,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}",
                     Credentials = new UsernamePasswordCredentials
                     {
                         Username = ri.Username,
@@ -103,7 +103,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{info.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{info.LocalPath}",
                     Credentials = new UsernamePasswordCredentials
                     {
                         Username = info.Username,
