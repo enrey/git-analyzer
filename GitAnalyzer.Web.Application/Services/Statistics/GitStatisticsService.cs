@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Web.Application.Statistics
+namespace GitAnalyzer.Web.Application.Services.Statistics
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев
@@ -49,7 +49,7 @@ namespace GitAnalyzer.Web.Application.Statistics
                 .Select(ri => new 
                 { 
                     ri.Name,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{ri.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}",
                     Credentials = new UsernamePasswordCredentials
                     {
                         Username = ri.Username,
@@ -103,7 +103,7 @@ namespace GitAnalyzer.Web.Application.Statistics
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}\{info.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{info.LocalPath}",
                     Credentials = new UsernamePasswordCredentials
                     {
                         Username = info.Username,
