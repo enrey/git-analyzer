@@ -17,13 +17,14 @@ namespace GitAnalyzer.IntegrationTests
         public void Setup()
         {
             var loggerMock = new Mock<ILogger<GitStatisticsService>>();
+
             var statisticsConfigMonitorMock = new Mock<IOptionsMonitor<StatisticsConfig>>();
             statisticsConfigMonitorMock.Setup(cfg => cfg.CurrentValue).Returns(new StatisticsConfig { PeriodIntervalDays = 1 });
 
             var repositoriesConfigMock = new Mock<IOptionsMonitor<RepositoriesConfig>>();
             repositoriesConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new RepositoriesConfig
             {
-                ReposFolder = "Test.Repos",
+                ReposFolder = "C:\\Test.Repos",
                 ReposInfo = new[]
                 {
                     new RepositoryInfoConfig
@@ -51,15 +52,26 @@ namespace GitAnalyzer.IntegrationTests
                         Password = ""
                     }
                 }
+            }); 
+
+            var workEstimateConfigMock = new Mock<IOptionsMonitor<WorkEstimateConfig>>();
+            workEstimateConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new WorkEstimateConfig
+            {
+                WorkDayHours = 8,
+                PaddingHours = 2
             });
 
-            _service = new GitStatisticsService(loggerMock.Object, statisticsConfigMonitorMock.Object, repositoriesConfigMock.Object);
+            _service = new GitStatisticsService(
+                loggerMock.Object, 
+                statisticsConfigMonitorMock.Object, 
+                repositoriesConfigMock.Object, 
+                workEstimateConfigMock.Object);
         }
 
         [Test]
-        public void UpdateAllRepositories_Test()
+        public async Task UpdateAllRepositories_Test()
         {
-            _service.UpdateAllRepositories();
+            await _service.UpdateAllRepositories();
         }
 
         [Test]
@@ -71,6 +83,18 @@ namespace GitAnalyzer.IntegrationTests
 
             //Act
             var result = await _service.GetAllRepositoriesStatisticsAsync(startDate, endDate);
+        }
+
+        [Test]
+        public async Task GetWorkSessionsEstimate_Test()
+        {
+            //Arrange
+            //var startDate = DateTime.Now.AddYears(-10);
+            var startDate = new DateTime(2000, 1, 28);
+            var endDate = DateTime.Now;
+
+            //Act
+            var result  = await _service.GetWorkSessionsEstimate(startDate, endDate);
         }
     }
 }

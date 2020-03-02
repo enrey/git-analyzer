@@ -59,5 +59,22 @@ namespace GitAnalyzer.Web.Api.Controllers
 
             return NoContent();
         }
+
+        /// <summary>
+        /// Оценки затраченного на работу времени
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        [HttpGet("work-estimates/{startDate}/{endDate}")]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryWorkEstimateContract>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRepositoriesWorkEstimate(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            var estimates = await _gitStatisticsService.GetWorkSessionsEstimate(startDate, endDate);
+
+            var result = _mapper.Map<IEnumerable<RepositoryWorkEstimateContract>>(estimates);
+
+            return Ok(result);
+        }
     }
 }
