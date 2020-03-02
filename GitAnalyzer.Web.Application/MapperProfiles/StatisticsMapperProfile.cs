@@ -15,6 +15,9 @@ namespace GitAnalyzer.Web.Application.MapperProfiles
             CreateMap<PeriodStatisticsDto, PeriodStatisticsContract>()
                 .ForMember(t => t.Date, o => o.MapFrom(s => s.Date.ToString("yyyy-MM-dd")));
             CreateMap<RepositoryStatisticsDto, RepositoryStatisticsContract>();
+
+            CreateMap<PersonWorkEstimateDto, PersonWorkEstimateContract>();
+            CreateMap<RepositoryWorkEstimateDto, RepositoryWorkEstimateContract>();
         }
     }
 }

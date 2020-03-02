@@ -22,5 +22,12 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         /// Обновление всех репозиториев
         /// </summary>
         Task UpdateAllRepositories();
+
+        /// <summary>
+        /// Суммирует часы по дням. 
+        /// Предполагаем, что работа за день началась за 2 часа до первого коммита и окончилась последним коммитом
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<RepositoryWorkEstimateDto>> GetWorkSessionsEstimate(DateTimeOffset startDate, DateTimeOffset endDate);
     }
 }
