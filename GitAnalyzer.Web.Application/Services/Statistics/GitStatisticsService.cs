@@ -19,6 +19,8 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         private readonly ILogger _logger;
         private readonly StatisticsConfig _statisticsConfig;
         private readonly RepositoriesConfig _repositoriesConfig;
+        private readonly WorkEstimateConfig _workEstimateConfig;
+
         private readonly object _locker = new object();
 
         /// <summary>
@@ -27,12 +29,14 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         public GitStatisticsService(
             ILogger<GitStatisticsService> logger,
             IOptionsMonitor<StatisticsConfig> statisticsConfigMonitor,
-            IOptionsMonitor<RepositoriesConfig> repositoriesConfig
+            IOptionsMonitor<RepositoriesConfig> repositoriesConfig,
+            IOptionsMonitor<WorkEstimateConfig> workEstimateConfig
             )
         {
             _logger = logger;
             _statisticsConfig = statisticsConfigMonitor.CurrentValue;
             _repositoriesConfig = repositoriesConfig.CurrentValue;
+            _workEstimateConfig = workEstimateConfig.CurrentValue;
         }
 
         /// <summary>
@@ -45,31 +49,12 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         {
             var dates = GetDates(startDate, endDate);
 
-            var validRepos = _repositoriesConfig.ReposInfo
-                .Select(ri => new 
-                { 
-                    ri.Name,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}",
-                    Credentials = new UsernamePasswordCredentials
-                    {
-                        Username = ri.Username,
-                        Password = ri.Password
-                    }
-                })
+            var validRepos = GetAllRepositoriesParameters()
                 .Where(ri => Repository.IsValid(ri.RepoPath));
 
             if (!validRepos.Any())
                 throw new Exception("Отсутствуют клонированные репозитории");
 
-
-            await Task.Run(() =>
-            {
-                Parallel.ForEach(validRepos, vr =>
-                {
-                    PullRepository(vr.RepoPath, vr.Credentials);
-                });
-            });
-            
 
             var result = new List<RepositoryStatisticsDto>();
 
@@ -99,6 +84,8 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         /// </summary>
         public async Task UpdateAllRepositories()
         {
+            _logger.LogInformation($"Updating repositories started");
+
             var reposInfo = _repositoriesConfig.ReposInfo
                 .Select(info => new
                 {
@@ -110,7 +97,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                         Password = info.Password
                     }
                 }).ToList();
-            
+
             await Task.Run(() =>
             {
                 Parallel.ForEach(reposInfo, info =>
@@ -121,8 +108,145 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                         PullRepository(info.RepoPath, info.Credentials);
                 });
             });
+
+            _logger.LogInformation($"Updating repositories ended");
         }
 
+        /// <summary>
+        /// Суммирует часы по дням. 
+        /// Предполагаем, что работа за день началась за 2 часа до первого коммита и окончилась последним коммитом
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<RepositoryWorkEstimateDto>> GetWorkSessionsEstimate(DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            var dates = GetDates(startDate, endDate);
+
+            var validRepos = GetAllRepositoriesParameters()
+                .Where(ri => Repository.IsValid(ri.RepoPath))
+                .ToList();
+
+            if (!validRepos.Any())
+                throw new Exception("Отсутствуют клонированные репозитории");
+
+
+            var result = new List<RepositoryWorkEstimateDto>();
+
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(validRepos,
+                    vr =>
+                    {
+                        var repoWorkEstimate = GetRepositoryWorkEstimate(vr, dates);
+
+                        lock (_locker)
+                        {
+                            result.Add(repoWorkEstimate);
+                        }
+                    });
+            });
+
+            return result.OrderBy(r => r.RepositoryName).ToList();
+        }
+
+        /// <summary>
+        /// Получить оценку рабочего
+        /// </summary>
+        /// <param name="repositoryParameters"></param>
+        /// <param name="dates"></param>
+        /// <returns></returns>
+        private RepositoryWorkEstimateDto GetRepositoryWorkEstimate(RepositoryParameters repositoryParameters, IEnumerable<DateTime> dates)
+        {
+            _logger.LogInformation($"Getting work estimates started: \"{repositoryParameters.RepoPath}\"");
+
+            using var repo = new Repository(repositoryParameters.RepoPath);
+
+            var commits = GetCommits(repo, dates, true);
+
+            var estimates = commits.Select(c => new
+            {
+                Email = c.Committer.Email.ToLower(),
+                Commit = c
+            })
+            .GroupBy(key => key.Email)
+            .Select(g => new
+            {
+                Email = g.Key,
+                //Commits = g.Select(v => v.Commit).ToList(),
+                Hours = EstimateHours(g.Select(v => v.Commit.Committer.When))
+            })
+            .Select(i => new PersonWorkEstimateDto
+            {
+                Email = i.Email,
+                //i.Commits,
+                Hours = Math.Round(i.Hours, 2),
+                Days = Math.Round(i.Hours / 8, 2)
+            })
+            .ToList();
+
+            var result = new RepositoryWorkEstimateDto
+            {
+                RepositoryName = repositoryParameters.Name,
+                Estimates = estimates
+            };
+
+            _logger.LogInformation($"Getting work estimates ended: \"{repositoryParameters.RepoPath}\"");
+
+            return result;
+        }
+
+        /// <summary>
+        /// Подсчет количества рабочих часов
+        /// </summary>
+        /// <param name="commitsDates"></param>
+        /// <returns></returns>
+        private double EstimateHours(IEnumerable<DateTimeOffset> commitsDates)
+        {
+            var next = new DateTimeOffset();
+            double dayHours = _workEstimateConfig.WorkDayHours;
+            double padding = _workEstimateConfig.PaddingHours;
+
+            double result = 0;
+
+            var ordered = commitsDates.OrderByDescending(cd => cd);
+
+            foreach (var t in ordered)
+            {
+                if (next.Ticks == 0)
+                {
+                    next = t;
+                    continue;
+                }
+
+                var diff = (next - t).TotalHours;
+
+                result += diff < dayHours
+                 ? diff
+                 : padding;
+
+                next = t;
+            }
+
+            result += padding;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Получить коммиты из репозитория за указанные даты с мерджами или без
+        /// </summary>
+        private IEnumerable<Commit> GetCommits(Repository repository, IEnumerable<DateTime> dates, bool includeMerges)
+        {
+            // iterate all branches (git log --all)
+            var filter = new CommitFilter { IncludeReachableFrom = repository.Branches };
+
+            var result = repository.Commits.QueryBy(filter)
+                .Where(c =>
+                    (includeMerges || !includeMerges && c.Parents.Count() == 1) &&
+                    dates.Contains(c.Committer.When.Date)
+                ).ToList();
+
+            return result;
+        }
 
         /// <summary>
         /// Клонировать репозиторий
@@ -204,7 +328,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                 };
 
                 var signature = new Signature(
-                    new Identity(_repositoriesConfig.MergeUserName, _repositoriesConfig.MergeUserEmail), 
+                    new Identity(_repositoriesConfig.MergeUserName, _repositoriesConfig.MergeUserEmail),
                     DateTimeOffset.Now);
 
                 _logger.LogInformation($"Pulling started: \"{repoPath}\"");
@@ -245,15 +369,9 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
 
             using var repo = new Repository(repositoryPath);
 
-            // iterate all branches (git log --all)
-            var filter = new CommitFilter { IncludeReachableFrom = repo.Branches };
+            var commits = GetCommits(repo, dates, false);
 
-            var filteredCommits = repo.Commits.QueryBy(filter).Where(c =>
-                c.Parents.Count() == 1 &&
-                dates.Contains(c.Committer.When.Date)
-            ).ToList();
-
-            var result = dates.Select(date => GetDayStatistics(repo, filteredCommits, date)).ToList();
+            var result = dates.Select(date => GetDayStatistics(repo, commits, date)).ToList();
 
             _logger.LogInformation($"Getting statistics ended: \"{repositoryPath}\"");
 
@@ -263,7 +381,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         /// <summary>
         /// Получить статистику за день
         /// </summary>
-        private PeriodStatisticsDto GetDayStatistics(Repository repository, ICollection<Commit> filteredCommits, DateTime date)
+        private PeriodStatisticsDto GetDayStatistics(Repository repository, IEnumerable<Commit> filteredCommits, DateTime date)
         {
             var dayCommits = filteredCommits.Where(c => c.Committer.When.Date == date).ToList();
 
@@ -309,6 +427,21 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
                 Date = date,
                 Statistics = statistics
             };
+        }
+
+        /// <summary>
+        /// Сформировать параметры репозиториев из конфигурации
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<RepositoryParameters> GetAllRepositoriesParameters()
+        {
+            return _repositoriesConfig.ReposInfo
+                .Select(ri => new RepositoryParameters
+                {
+                    Name = ri.Name,
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}"
+                })
+                .ToList();
         }
     }
 }

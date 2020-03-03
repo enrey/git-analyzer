@@ -48,6 +48,7 @@ namespace GitAnalyzer.Web.Api
 
             services.Configure<StatisticsConfig>(Configuration.GetSection("Statistics"));
             services.Configure<RepositoriesConfig>(Configuration.GetSection("Repositories"));
+            services.Configure<WorkEstimateConfig>(Configuration.GetSection("WorkEstimate"));
 
             services.AddCors();
         }
