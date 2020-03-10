@@ -32,7 +32,7 @@ namespace GitAnalyzer.IntegrationTests
                 {
                     //new RepositoryInfoConfig
                     //{
-                    //    Name = "Автокод",
+                    //    Name = "AVTOKOD",
                     //    Url = "http://git.it2g.ru/avtokod/siv.avtokod.git",
                     //    LocalPath = "siv.avtokod",
                     //    Username = "",
@@ -40,7 +40,7 @@ namespace GitAnalyzer.IntegrationTests
                     //},
                     //new RepositoryInfoConfig
                     //{
-                    //    Name = "НПА",
+                    //    Name = "NPA",
                     //    Url = "http://git.it2g.ru/npa/npa.git",
                     //    LocalPath = "npa",
                     //    Username = "",
