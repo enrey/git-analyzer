@@ -20,6 +20,11 @@ namespace GitAnalyzer.Web.Application.Configuration
         public string MergeUserEmail { get; set; }
 
         /// <summary>
+        /// Период обновления репозиториев (в минутах)
+        /// </summary>
+        public int ReposUpdatePeriodMinutes { get; set; }
+
+        /// <summary>
         /// Конфигурации репозиториев
         /// </summary>
         public IEnumerable<RepositoryInfoConfig> ReposInfo { get; set; }
