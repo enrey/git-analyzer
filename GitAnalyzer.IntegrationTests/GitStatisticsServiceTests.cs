@@ -12,11 +12,12 @@ namespace GitAnalyzer.IntegrationTests
     public class GitStatisticsServiceTests
     {
         IGitStatisticsService _service;
+        LoggerMock _loggerMock;
 
         [SetUp]
         public void Setup()
         {
-            var loggerMock = new Mock<ILogger<GitStatisticsService>>();
+            _loggerMock = new LoggerMock();
 
             var statisticsConfigMonitorMock = new Mock<IOptionsMonitor<StatisticsConfig>>();
             statisticsConfigMonitorMock.Setup(cfg => cfg.CurrentValue).Returns(new StatisticsConfig { PeriodIntervalDays = 1 });
@@ -25,27 +26,29 @@ namespace GitAnalyzer.IntegrationTests
             repositoriesConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new RepositoriesConfig
             {
                 ReposFolder = "C:\\Test.Repos",
+                MergeUserName = "robotovya",
+                MergeUserEmail = "robotovya@it2g.ru",
                 ReposInfo = new[]
                 {
+                    //new RepositoryInfoConfig
+                    //{
+                    //    Name = "AVTOKOD",
+                    //    Url = "http://git.it2g.ru/avtokod/siv.avtokod.git",
+                    //    LocalPath = "siv.avtokod",
+                    //    Username = "",
+                    //    Password = ""
+                    //},
+                    //new RepositoryInfoConfig
+                    //{
+                    //    Name = "NPA",
+                    //    Url = "http://git.it2g.ru/npa/npa.git",
+                    //    LocalPath = "npa",
+                    //    Username = "",
+                    //    Password = ""
+                    //},
                     new RepositoryInfoConfig
                     {
-                        Name = "¿‚ÚÓÍÓ‰",
-                        Url = "http://git.it2g.ru/avtokod/siv.avtokod.git",
-                        LocalPath = "siv.avtokod",
-                        Username = "",
-                        Password = ""
-                    },
-                    new RepositoryInfoConfig
-                    {
-                        Name = "Õœ¿",
-                        Url = "http://git.it2g.ru/npa/npa.git",
-                        LocalPath = "npa",
-                        Username = "",
-                        Password = ""
-                    },
-                    new RepositoryInfoConfig
-                    {
-                        Name = "–¬œ ¬Õ∆",
+                        Name = "MMCSERV",
                         Url = "http://git.it2g.ru/mmc/rvp-vnj.git",
                         LocalPath = "rvp-vnj",
                         Username = "",
@@ -62,7 +65,7 @@ namespace GitAnalyzer.IntegrationTests
             });
 
             _service = new GitStatisticsService(
-                loggerMock.Object, 
+                _loggerMock, 
                 statisticsConfigMonitorMock.Object, 
                 repositoriesConfigMock.Object, 
                 workEstimateConfigMock.Object);
@@ -71,7 +74,11 @@ namespace GitAnalyzer.IntegrationTests
         [Test]
         public async Task UpdateAllRepositories_Test()
         {
+            //Act
             await _service.UpdateAllRepositories();
+
+            //Assert
+            Assert.IsNull(_loggerMock.Error, _loggerMock.Error);
         }
 
         [Test]
@@ -90,11 +97,36 @@ namespace GitAnalyzer.IntegrationTests
         {
             //Arrange
             //var startDate = DateTime.Now.AddYears(-10);
-            var startDate = new DateTime(2000, 1, 28);
+            //var startDate = new DateTime(2000, 1, 28);
+            var startDate = DateTime.Now.AddMonths(-1);
             var endDate = DateTime.Now;
 
             //Act
             var result  = await _service.GetWorkSessionsEstimate(startDate, endDate);
+        }
+    }
+
+    /// <summary>
+    /// Mock ‰Îˇ ÎÓ„„Â‡
+    /// </summary>
+    public class LoggerMock : ILogger<GitStatisticsService>
+    {
+        public string Error { get; set; }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (logLevel == LogLevel.Error)
+                Error = formatter(state, exception);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GitAnalyzer.Web.Application.Configuration;
 using GitAnalyzer.Web.Application.MapperProfiles;
+using GitAnalyzer.Web.Application.Services.Hosted;
 using GitAnalyzer.Web.Application.Services.Statistics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -51,6 +52,8 @@ namespace GitAnalyzer.Web.Api
             services.Configure<WorkEstimateConfig>(Configuration.GetSection("WorkEstimate"));
 
             services.AddCors();
+
+            services.AddHostedService<UpdateRepositoriesHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

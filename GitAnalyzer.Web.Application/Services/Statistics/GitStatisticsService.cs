@@ -164,7 +164,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
 
             var estimates = commits.Select(c => new
             {
-                Email = c.Committer.Email.ToLower(),
+                Email = c.Author.Email.ToLower(),
                 Commit = c
             })
             .GroupBy(key => key.Email)
@@ -172,7 +172,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
             {
                 Email = g.Key,
                 //Commits = g.Select(v => v.Commit).ToList(),
-                Hours = EstimateHours(g.Select(v => v.Commit.Committer.When))
+                Hours = EstimateHours(g.Select(v => v.Commit.Author.When))
             })
             .Select(i => new PersonWorkEstimateDto
             {
@@ -242,7 +242,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
             var result = repository.Commits.QueryBy(filter)
                 .Where(c =>
                     (includeMerges || !includeMerges && c.Parents.Count() == 1) &&
-                    dates.Contains(c.Committer.When.Date)
+                    dates.Contains(c.Author.When.Date)
                 ).ToList();
 
             return result;
@@ -383,7 +383,7 @@ namespace GitAnalyzer.Web.Application.Services.Statistics
         /// </summary>
         private PeriodStatisticsDto GetDayStatistics(Repository repository, IEnumerable<Commit> filteredCommits, DateTime date)
         {
-            var dayCommits = filteredCommits.Where(c => c.Committer.When.Date == date).ToList();
+            var dayCommits = filteredCommits.Where(c => c.Author.When.Date == date).ToList();
 
             var statistics = dayCommits.SelectMany(commit =>
                  commit.Parents.SelectMany(parent =>
