@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GitAnalyzer.Web.Application.Dto.Statistics
+namespace GitAnalyzer.Application.Dto.Statistics
 {
     public class RepositoryWorkEstimateDto
     {

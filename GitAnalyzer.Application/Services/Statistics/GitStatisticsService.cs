@@ -1,5 +1,5 @@
-﻿using GitAnalyzer.Web.Application.Configuration;
-using GitAnalyzer.Web.Application.Dto.Statistics;
+﻿using GitAnalyzer.Application.Configuration;
+using GitAnalyzer.Application.Dto.Statistics;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Web.Application.Services.Statistics
+namespace GitAnalyzer.Application.Services.Statistics
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев

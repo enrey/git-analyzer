@@ -1,4 +1,4 @@
-﻿namespace GitAnalyzer.Web.Application.Dto.Statistics
+﻿namespace GitAnalyzer.Application.Dto.Statistics
 {
     /// <summary>
     /// DTO статистики по сотруднику
