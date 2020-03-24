@@ -37,6 +37,7 @@ namespace GitAnalyzer.Web.Api.Controllers
         /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
         /// <returns></returns>
         [HttpGet("{startDate}/{endDate}")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 300)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryStatisticsContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
