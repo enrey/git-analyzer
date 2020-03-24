@@ -9,12 +9,14 @@
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GitAnalyzer.Web.Contracts\GitAnalyzer.Web.Contracts.csproj" />
+    <ProjectReference Include="..\GitLabApiClient\GitLabApiClient.csproj" />
   </ItemGroup>
 
 </Project>
