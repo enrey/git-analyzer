@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitAnalyzer.Web.GitLab.Api"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{E8A5AC18-A7CF-4387-AD1F-8D230D81FF70}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitLabApiClient", "GitLabApiClient\GitLabApiClient.csproj", "{0145D84C-703A-4362-B4BF-D2EE837AD410}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{7B6BBFA0-0E07-4A04-B8B0-AB3C9199BFC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B6BBFA0-0E07-4A04-B8B0-AB3C9199BFC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B6BBFA0-0E07-4A04-B8B0-AB3C9199BFC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0145D84C-703A-4362-B4BF-D2EE837AD410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0145D84C-703A-4362-B4BF-D2EE837AD410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0145D84C-703A-4362-B4BF-D2EE837AD410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0145D84C-703A-4362-B4BF-D2EE837AD410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +64,7 @@ Global
 		{22C0C740-6652-4835-A6F1-2D81818904B1} = {55777E1C-7D25-4B1A-8F39-85631533F219}
 		{DF94EA75-C8C1-4F04-A019-CA7236344470} = {E8A5AC18-A7CF-4387-AD1F-8D230D81FF70}
 		{7B6BBFA0-0E07-4A04-B8B0-AB3C9199BFC0} = {55777E1C-7D25-4B1A-8F39-85631533F219}
+		{0145D84C-703A-4362-B4BF-D2EE837AD410} = {E8A5AC18-A7CF-4387-AD1F-8D230D81FF70}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D19477A8-0BA8-4E5B-B644-70F4B7915F98}
