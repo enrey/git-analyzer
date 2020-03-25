@@ -265,3 +265,5 @@ appsettings.Development.json
 
 # Repositories folder
 **/Repos
+
+!GitLabApiClient/Models/Releases
