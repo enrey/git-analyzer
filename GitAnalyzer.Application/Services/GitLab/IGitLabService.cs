@@ -1,4 +1,5 @@
-﻿using GitLabApiClient.Models.MergeRequests.Responses;
+﻿using GitAnalyzer.Application.Dto.GitLab;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,6 +10,9 @@ namespace GitAnalyzer.Application.Services.GitLab
     /// </summary>
     public interface IGitLabService
     {
-        Task<IEnumerable<MergeRequest>> GetMergeRequests();
+        /// <summary>
+        /// Получить статистику пользователей по мерджреквестам
+        /// </summary>
+        Task<IEnumerable<UserMergeRequestsStatisicsDto>> GetMergeRequestsStatistics(DateTime startDate, DateTime endDate);
     }
 }

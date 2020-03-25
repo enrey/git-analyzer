@@ -1,5 +1,6 @@
 ﻿using GitAnalyzer.Application.Services.GitLab;
 using NUnit.Framework;
+using System;
 using System.Threading.Tasks;
 
 namespace GitAnalyzer.IntegrationTests
@@ -18,9 +19,13 @@ namespace GitAnalyzer.IntegrationTests
         }
 
         [Test]
-        public async Task GetMergeRequests_Success()
+        public async Task GetMergeRequestsStatistics_Success()
         {
-            var requests = await _service.GetMergeRequests();
+            //Arrange
+            var startDate = DateTime.Now.AddMonths(-1);
+            var endDate = DateTime.Now;
+
+            var requests = await _service.GetMergeRequestsStatistics(startDate, endDate);
         }
     }
 }
