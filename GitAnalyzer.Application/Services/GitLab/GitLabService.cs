@@ -1,6 +1,8 @@
-﻿using GitAnalyzer.Application.Dto.GitLab;
+﻿using GitAnalyzer.Application.Configuration;
+using GitAnalyzer.Application.Dto.GitLab;
 using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +15,18 @@ namespace GitAnalyzer.Application.Services.GitLab
     /// </summary>
     public class GitLabService : IGitLabService
     {
+        private readonly GitLabConfig _gitLabConfig;
+        private readonly RepositoriesConfig _repositoriesConfig;
 
         /// <summary>
         /// Сервис для взаимодействия с GitLab
         /// </summary>
-        public GitLabService()
+        public GitLabService(
+            IOptionsMonitor<GitLabConfig> gitLabOptionsMonitor,
+            IOptionsMonitor<RepositoriesConfig> repositoriesOptionsMonitor)
         {
+            _gitLabConfig = gitLabOptionsMonitor.CurrentValue;
+            _repositoriesConfig = repositoriesOptionsMonitor.CurrentValue;
         }
 
         /// <summary>
@@ -26,13 +34,25 @@ namespace GitAnalyzer.Application.Services.GitLab
         /// </summary>
         public async Task<IEnumerable<UserMergeRequestsStatisicsDto>> GetMergeRequestsStatistics(DateTime startDate, DateTime endDate)
         {
-            var baseUrl = "http://git.it2g.ru/api/v4";
-            var privateToken = "";
+            var configRepos = _repositoriesConfig.ReposInfo
+                .Select(ri => new { ri.Name, Url = ri.Url.ToLower() })
+                .ToList();
 
-            var client = new GitLabClient(baseUrl, privateToken);
-
+            var client = new GitLabClient(
+                _gitLabConfig.BaseUrl, 
+                _gitLabConfig.PrivateToken);
+            
             var users = (await client.Users.GetAsync())
                 .Select(u => new { u.Id, u.Email })
+                .ToList();
+
+            var repos = (await client.Projects.GetAsync())
+                .Where(pr => configRepos.Select(cr => cr.Url).Contains(pr.HttpUrlToRepo.ToLower()))
+                .Join(configRepos, loaded => loaded.HttpUrlToRepo, cfgRepo => cfgRepo.Url, (loaded, cfgRepo) => new 
+                {
+                    loaded.Id,
+                    cfgRepo.Name
+                })
                 .ToList();
 
             var mergeRequests = (await client.MergeRequests.GetAsync(options =>
@@ -98,16 +118,22 @@ namespace GitAnalyzer.Application.Services.GitLab
                 })
                 .Join(users, stat => stat.UserId, user => user.Id, (stat, user) => new 
                 {
-                    stat.ProjectId, 
+                    ProjectId = int.Parse(stat.ProjectId), 
                     stat.UserId,
                     user.Email,
                     stat.Created,
                     stat.Merged
                 })
+                .Join(repos, stat => stat.ProjectId, repo => repo.Id, (stat, repo) => new UserMergeRequestsStatisicsDto 
+                { 
+                    RepositoryName = repo.Name,
+                    Email = stat.Email,
+                    Opened = stat.Created,
+                    Merged = stat.Merged
+                })
                 .ToList();
 
-
-            return null;
+            return statistics;
         }
     }
 }
