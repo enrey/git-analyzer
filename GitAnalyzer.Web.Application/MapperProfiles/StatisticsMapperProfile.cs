@@ -2,7 +2,7 @@
 using GitAnalyzer.Application.Dto.Statistics;
 using GitAnalyzer.Web.Contracts.Statistics;
 
-namespace GitAnalyzer.Application.MapperProfiles
+namespace GitAnalyzer.Web.Application.MapperProfiles
 {
     /// <summary>
     /// Профиль маппинга для DTO Statistics

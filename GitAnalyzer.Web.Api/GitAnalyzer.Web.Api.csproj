@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GitAnalyzer.Application\GitAnalyzer.Application.csproj" />
+    <ProjectReference Include="..\GitAnalyzer.Web.Application\GitAnalyzer.Web.Application.csproj" />
     <ProjectReference Include="..\GitAnalyzer.Web.Contracts\GitAnalyzer.Web.Contracts.csproj" />
   </ItemGroup>
 

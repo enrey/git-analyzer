@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GitAnalyzer.Web.Contracts\GitAnalyzer.Web.Contracts.csproj" />
     <ProjectReference Include="..\GitLabApiClient\GitLabApiClient.csproj" />
   </ItemGroup>
 
