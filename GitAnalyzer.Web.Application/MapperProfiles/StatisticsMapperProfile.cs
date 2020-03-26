@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using GitAnalyzer.Web.Application.Dto.Statistics;
+using GitAnalyzer.Application.Dto.Statistics;
 using GitAnalyzer.Web.Contracts.Statistics;
 
 namespace GitAnalyzer.Web.Application.MapperProfiles

@@ -6,10 +6,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper;
-using GitAnalyzer.Web.Application.Configuration;
+using GitAnalyzer.Application.Configuration;
+using GitAnalyzer.Application.Services.Hosted;
+using GitAnalyzer.Application.Services.Statistics;
 using GitAnalyzer.Web.Application.MapperProfiles;
-using GitAnalyzer.Web.Application.Services.Hosted;
-using GitAnalyzer.Web.Application.Services.Statistics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +50,7 @@ namespace GitAnalyzer.Web.Api
             services.Configure<StatisticsConfig>(Configuration.GetSection("Statistics"));
             services.Configure<RepositoriesConfig>(Configuration.GetSection("Repositories"));
             services.Configure<WorkEstimateConfig>(Configuration.GetSection("WorkEstimate"));
+            services.Configure<GitLabConfig>(Configuration.GetSection("GitLab"));
 
             services.AddCors();
 
