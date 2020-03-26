@@ -266,5 +266,6 @@ appsettings.Test.json
 
 # Repositories folder
 **/Repos
+Temp_Repositories
 
 !GitLabApiClient/Models/Releases

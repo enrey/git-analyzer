@@ -47,6 +47,8 @@ namespace GitAnalyzer.Web.Api
 
             services.AddAutoMapper(typeof(StatisticsMapperProfile));
 
+            services.AddMemoryCache();
+
             services.Configure<StatisticsConfig>(Configuration.GetSection("Statistics"));
             services.Configure<RepositoriesConfig>(Configuration.GetSection("Repositories"));
             services.Configure<WorkEstimateConfig>(Configuration.GetSection("WorkEstimate"));
