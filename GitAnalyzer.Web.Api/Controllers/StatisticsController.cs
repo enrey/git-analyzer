@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using GitAnalyzer.Web.Application.Services.Statistics;
+using GitAnalyzer.Application.Services.Statistics;
 using GitAnalyzer.Web.Contracts.Statistics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

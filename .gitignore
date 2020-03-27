@@ -260,9 +260,12 @@ paket-files/
 __pycache__/
 *.pyc
 
-# Local development settings
+# Local development and test settings
 appsettings.Development.json
+appsettings.Test.json
 
 # Repositories folder
 **/Repos
 Temp_Repositories
+
+!GitLabApiClient/Models/Releases
