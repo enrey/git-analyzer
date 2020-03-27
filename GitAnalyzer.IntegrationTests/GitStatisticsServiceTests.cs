@@ -1,11 +1,11 @@
-using GitAnalyzer.Web.Application.Configuration;
+using GitAnalyzer.Application.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
-using GitAnalyzer.Web.Application.Services.Statistics;
+using GitAnalyzer.Application.Services.Statistics;
 
 namespace GitAnalyzer.IntegrationTests
 {
