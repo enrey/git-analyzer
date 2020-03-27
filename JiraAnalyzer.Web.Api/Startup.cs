@@ -6,10 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper;
-using GitAnalyzer.Web.Application.Configuration;
-using GitAnalyzer.Web.Application.MapperProfiles;
-using GitAnalyzer.Web.Application.Services.Hosted;
-using GitAnalyzer.Web.Application.Services.Statistics;
+using JiraAnalyzer.Web.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +16,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
-namespace GitAnalyzer.Web.Api
+namespace JiraAnalyzer.Web.Api
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
+
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -37,25 +34,20 @@ namespace GitAnalyzer.Web.Api
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Git analyzer API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Jira analyzer API", Version = "v1" });
 
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddTransient<IGitStatisticsService, GitStatisticsService>();
+            services.AddTransient<JiraService>();
+            services.AddTransient<JiraLoader>();
+            services.AddTransient<DashService>();
 
-            services.AddAutoMapper(typeof(StatisticsMapperProfile));
+            services.Configure<JiraConfig>(Configuration.GetSection("JiraConfig"));
 
             services.AddMemoryCache();
-
-            services.Configure<StatisticsConfig>(Configuration.GetSection("Statistics"));
-            services.Configure<RepositoriesConfig>(Configuration.GetSection("Repositories"));
-            services.Configure<WorkEstimateConfig>(Configuration.GetSection("WorkEstimate"));
-
             services.AddCors();
-
-            services.AddHostedService<UpdateRepositoriesHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

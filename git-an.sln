@@ -7,13 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "git-an", "git-an\git-an.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{55777E1C-7D25-4B1A-8F39-85631533F219}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitAnalyzer.Web.Api", "GitAnalyzer.Web.Api\GitAnalyzer.Web.Api.csproj", "{44CCA717-6A5F-4499-90AB-FE2A03995E01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitAnalyzer.Web.Api", "GitAnalyzer.Web.Api\GitAnalyzer.Web.Api.csproj", "{44CCA717-6A5F-4499-90AB-FE2A03995E01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitAnalyzer.Web.Contracts", "GitAnalyzer.Web.Contracts\GitAnalyzer.Web.Contracts.csproj", "{22C0C740-6652-4835-A6F1-2D81818904B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitAnalyzer.Web.Contracts", "GitAnalyzer.Web.Contracts\GitAnalyzer.Web.Contracts.csproj", "{22C0C740-6652-4835-A6F1-2D81818904B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitAnalyzer.Web.Application", "GitAnalyzer.Web.Application\GitAnalyzer.Web.Application.csproj", "{DF94EA75-C8C1-4F04-A019-CA7236344470}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitAnalyzer.Web.Application", "GitAnalyzer.Web.Application\GitAnalyzer.Web.Application.csproj", "{DF94EA75-C8C1-4F04-A019-CA7236344470}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitAnalyzer.IntegrationTests", "GitAnalyzer.IntegrationTests\GitAnalyzer.IntegrationTests.csproj", "{611010A4-502E-4218-8B6E-766AEA3F791F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitAnalyzer.IntegrationTests", "GitAnalyzer.IntegrationTests\GitAnalyzer.IntegrationTests.csproj", "{611010A4-502E-4218-8B6E-766AEA3F791F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiraAnalyzer.Web.Api", "JiraAnalyzer.Web.Api\JiraAnalyzer.Web.Api.csproj", "{E40B104B-5E0C-4A6F-8FA2-231E8818AAD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JiraAnalyzer.IntegrationTests", "JiraAnalyzer.IntegrationTests\JiraAnalyzer.IntegrationTests.csproj", "{BFC6575D-6F16-48EF-B397-869FD11E100B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +45,14 @@ Global
 		{611010A4-502E-4218-8B6E-766AEA3F791F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{611010A4-502E-4218-8B6E-766AEA3F791F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{611010A4-502E-4218-8B6E-766AEA3F791F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E40B104B-5E0C-4A6F-8FA2-231E8818AAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E40B104B-5E0C-4A6F-8FA2-231E8818AAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E40B104B-5E0C-4A6F-8FA2-231E8818AAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E40B104B-5E0C-4A6F-8FA2-231E8818AAD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFC6575D-6F16-48EF-B397-869FD11E100B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC6575D-6F16-48EF-B397-869FD11E100B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC6575D-6F16-48EF-B397-869FD11E100B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC6575D-6F16-48EF-B397-869FD11E100B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
