@@ -18,6 +18,15 @@ namespace JiraAnalyzer.Web.Api.Dto
 
         public int DaysBeforeTest { get; set; }
 
+        public DateTime? DateStartDev { get; set; }
+        public DateTime? DateEndDev { get; set; }
+        public DateTime? DateToTest { get; set; }
+        public DateTime? DateClosed { get; set; }
+        public DateTime? DateApprove { get; set; }
+        public DateTime? ReadyForDev { get; set; }
+        public DateTime? DateAnalysis { get; set; }
+
+
         public DateTime DaysDate { get; set; }
 
         public DateTime DaysBeforeTestDate { get; set; }

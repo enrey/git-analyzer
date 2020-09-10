@@ -45,15 +45,33 @@ namespace JiraAnalyzer.Web.Api.Services
                 }
 
                 var daysInWork = 0;
+                DateTime? dateStartDev = null;
+                DateTime? dateEndDev = null;
+                DateTime? dateToTest = null;
+                DateTime? dateClosed = null;
+                DateTime? dateApprove = null;
+                DateTime? dateReadyForDev = null;
+                DateTime? dateAnalysis = null;
+
+                dateClosed = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Закрыт")).LastOrDefault()?.CreatedDate;
+                dateApprove = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Утверждение")).LastOrDefault()?.CreatedDate;
+                dateReadyForDev = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Готова для разработки")).LastOrDefault()?.CreatedDate;
+                //first
+                dateAnalysis = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Аналитика")).FirstOrDefault()?.CreatedDate;
+                dateToTest = inTestEntry?.CreatedDate;
 
                 // Если тестинг меньше разработки то какой-нить мусор с утверждением или что-то в этом роде
                 if (inTestEntry != null && inTestEntry.CreatedDate > inDevelopEntry.CreatedDate)
                 {
                     daysInWork = GetWorkingDays(inDevelopEntry.CreatedDate, inTestEntry.CreatedDate);
+                    dateStartDev = inDevelopEntry.CreatedDate;
+                    dateEndDev = inTestEntry.CreatedDate;
                 }
                 else
                 {
                     daysInWork = GetWorkingDays(inDevelopEntry.CreatedDate, DateTime.Now);
+                    dateStartDev = inDevelopEntry.CreatedDate;
+                    //dateEndDev = DateTime.MaxValue;
                 }
 
                 var inDevelopAssignee = GetDevAssignee(users, issue, featureLogStatuses, inDevelopEntry);
@@ -72,7 +90,14 @@ namespace JiraAnalyzer.Web.Api.Services
                     Type = issue.Type.Name,
                     Number = issue.Key.Value,
                     Project = issue.Project,
-                    Name = issue.Summary
+                    Name = issue.Summary,
+                    DateStartDev = dateStartDev,
+                    DateEndDev = dateEndDev,
+                    DateClosed = dateClosed,
+                    DateToTest = dateToTest,
+                    DateApprove = dateApprove,
+                    ReadyForDev = dateReadyForDev,
+                    DateAnalysis = dateAnalysis
                 });
             }
 

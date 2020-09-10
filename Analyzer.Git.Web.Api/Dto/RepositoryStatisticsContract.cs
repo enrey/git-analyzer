@@ -13,6 +13,11 @@ namespace GitAnalyzer.Web.Contracts.Statistics
         public string RepositoryName { get; set; }
 
         /// <summary>
+        /// UI для фронта
+        /// </summary>
+        public string WebUI { get; set; }
+
+        /// <summary>
         /// Периоды статистики
         /// </summary>
         public IEnumerable<PeriodStatisticsContract> Periods { get; set; }

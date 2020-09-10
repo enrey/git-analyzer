@@ -8,7 +8,12 @@
         /// <summary>
         /// Базовый URL
         /// </summary>
-        public string BaseUrl { get; set; }
+        public string ApiUrl { get; set; }
+
+        /// <summary>
+        /// GIT UI URL
+        /// </summary>
+        public string WebUrl { get; set; }
 
         /// <summary>
         /// Токен авторизации

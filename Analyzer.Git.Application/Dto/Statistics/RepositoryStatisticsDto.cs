@@ -13,6 +13,11 @@ namespace GitAnalyzer.Application.Dto.Statistics
         public string RepositoryName { get; set; }
 
         /// <summary>
+        /// URL для UI
+        /// </summary>
+        public string WebUI { get; set; }
+
+        /// <summary>
         /// Периоды статистики
         /// </summary>
         public IEnumerable<PeriodStatisticsDto> Periods { get; set; }

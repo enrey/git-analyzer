@@ -13,6 +13,13 @@ namespace GitAnalyzer.Web.Contracts.GitLab
         public string Email { get; set; }
 
         /// <summary>
+        /// Username пользователя
+        /// </summary>
+        public string Username { get; set; }
+
+        public int CommitsTotal { get; set; }
+
+        /// <summary>
         /// Количество открытых пользователем реквестов
         /// </summary>
         public int OpenedTotal { get; set; }

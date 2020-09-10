@@ -1,6 +1,7 @@
 ﻿using GitAnalyzer.Application.Configuration;
 using GitAnalyzer.Application.Dto.Statistics;
 using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -67,6 +68,7 @@ namespace GitAnalyzer.Application.Services.Statistics
                         var repoStatistics = new RepositoryStatisticsDto
                         {
                             RepositoryName = ri.Name,
+                            WebUI = ri.WebUI,
                             Periods = GetStatisticsByDates(ri.RepoPath, dates)
                         };
 
@@ -87,16 +89,19 @@ namespace GitAnalyzer.Application.Services.Statistics
         {
             _logger.LogInformation($"Updating repositories started");
 
+            // TODO: Если токена нет то использовать логин/пароль Credentials = new UsernamePasswordCredentials { Username = info.Username, Password = info.Password }
+            var defaultCreds = new UsernamePasswordCredentials
+            {
+                Username = "token",
+                Password = _repositoriesConfig.GitlabAuthToken
+            };
+
             var reposInfo = _repositoriesConfig.ReposInfo
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
                     RepoPath = @$"{_repositoriesConfig.ReposFolder}/{info.LocalPath}",
-                    Credentials = new UsernamePasswordCredentials 
-                    {
-                        Username = info.Username,
-                        Password = info.Password
-                    }
+                    Credentials = defaultCreds
                 }).ToList();
 
             await Task.Run(() =>
@@ -407,7 +412,7 @@ namespace GitAnalyzer.Application.Services.Statistics
                 {
                     g.Key.Name,
                     g.Key.Email,
-                    Shas = g.Select(o=>o.Sha),
+                    Shas = g.Select(o => o.Sha),
                     Added = g.Sum(g => g.Added),
                     Deleted = g.Sum(g => g.Deleted),
                     Total = g.Sum(g => g.Total),
@@ -418,7 +423,7 @@ namespace GitAnalyzer.Application.Services.Statistics
                     Name = g.Key.Name,
                     Email = g.Key.Email,
                     Commits = g.Count(),
-                    Shas = g.SelectMany(o=>o.Shas).ToList(),
+                    Shas = g.SelectMany(o => o.Shas).ToList(),
                     Added = g.Sum(g => g.Added),
                     Deleted = g.Sum(g => g.Deleted),
                     Total = g.Sum(g => g.Total),
@@ -443,6 +448,7 @@ namespace GitAnalyzer.Application.Services.Statistics
                 .Select(ri => new RepositoryParameters
                 {
                     Name = ri.Name,
+                    WebUI = ri.WebUI,
                     RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}"
                 })
                 .ToList();
