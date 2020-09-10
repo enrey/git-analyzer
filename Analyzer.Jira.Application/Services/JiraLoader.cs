@@ -12,10 +12,12 @@ namespace JiraAnalyzer.Web.Api.Services
         private const int USER_STEP = 50;
         private const int ISSUE_STEP = 100;
         private readonly JiraConfig _jiraConfig;
+        private readonly Jira _jiraClient;
 
         public JiraLoader(IOptionsMonitor<JiraConfig> jiraConfig)
         {
             _jiraConfig = jiraConfig.CurrentValue;
+            _jiraClient = GetClient();
         }
 
         public IList<JiraUser> GetAllUsers()
@@ -49,6 +51,17 @@ namespace JiraAnalyzer.Web.Api.Services
             return issues;
         }
 
+        public IList<Issue> GetIssuesRelease(string query)
+        {
+            var task = GetIssuesAsync(query);
+            task.Wait();
+
+            var issues = task.Result;
+
+            return issues;
+        }
+
+
         public List<IssueChangeLog> GetLogs(Issue issue)
         {
             var task = GetLog(issue);
@@ -78,7 +91,7 @@ namespace JiraAnalyzer.Web.Api.Services
 
         private async Task<IPagedQueryResult<Issue>> SearchQuery(string query, int skip, int take)
         {
-            return await GetClient().Issues.GetIssuesFromJqlAsync(query, startAt: skip, maxIssues: take);
+            return await _jiraClient.Issues.GetIssuesFromJqlAsync(query, startAt: skip, maxIssues: take);
         }
 
         public IList<JiraUser> GetAllUsersFromGroup()
@@ -90,7 +103,7 @@ namespace JiraAnalyzer.Web.Api.Services
 
         private async Task<IList<JiraUser>> GetUsersAsync()
         {
-            var res = await GetClient().Users.SearchUsersAsync(".", maxResults: 1000);
+            var res = await _jiraClient.Users.SearchUsersAsync(".", maxResults: 1000);
             return res.ToList();
         }
 
@@ -103,7 +116,7 @@ namespace JiraAnalyzer.Web.Api.Services
 
             while (startAt < total)
             {
-                var res = await GetClient().Groups.GetUsersAsync(_jiraConfig.UserGroupName, startAt: startAt, maxResults: USER_STEP);
+                var res = await _jiraClient.Groups.GetUsersAsync(_jiraConfig.UserGroupName, startAt: startAt, maxResults: USER_STEP);
                 all.AddRange(res.ToList());
 
                 startAt += USER_STEP;

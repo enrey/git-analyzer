@@ -14,5 +14,11 @@ namespace GitAnalyzer.Application.Services.GitLab
         /// Получить статистику пользователей по мерджреквестам
         /// </summary>
         Task<IEnumerable<UserMergeRequestsStatisicsDto>> GetMergeRequestsStatistics(DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Получить всех пользователей
+        /// </summary>
+        Task<IEnumerable<UsersDto>> GetUsers();
+
     }
 }

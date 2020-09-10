@@ -5,6 +5,11 @@ namespace GitAnalyzer.Application.Configuration
     public class RepositoriesConfig
     {
         /// <summary>
+        /// Токен для глобальной авторизации в гитлабе
+        /// </summary>
+        public string GitlabAuthToken { get; set; }
+
+        /// <summary>
         /// Папка размещения репозиториев
         /// </summary>
         public string ReposFolder { get; set; }

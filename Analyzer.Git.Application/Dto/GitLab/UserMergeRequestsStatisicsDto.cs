@@ -3,6 +3,25 @@
 namespace GitAnalyzer.Application.Dto.GitLab
 {
     /// <summary>
+    /// DTO для данных о пользователях GitLab
+    /// </summary>
+    public class UsersDto
+    {
+        /// <summary>
+        /// Email пользователя
+        /// </summary>
+        public string Email { get; set; }
+
+        /// <summary>
+        /// Username пользователя
+        /// </summary>
+        public string Username { get; set; }
+
+        public string Url { get; set; }
+    }
+
+
+    /// <summary>
     /// DTO для данных о мердж реквестах пользователя GitLab
     /// </summary>
     public class UserMergeRequestsStatisicsDto
@@ -11,6 +30,11 @@ namespace GitAnalyzer.Application.Dto.GitLab
         /// Email пользователя
         /// </summary>
         public string Email { get; set; }
+
+        /// <summary>
+        /// Username пользователя
+        /// </summary>
+        public string Username { get; set; }
 
         /// <summary>
         /// Количество открытых пользователем реквестов

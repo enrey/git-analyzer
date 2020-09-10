@@ -55,5 +55,23 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
                     return Ok(result);
                 });
         }
+
+        /// <summary>
+        /// Получение пользователей GitLab'а
+        /// </summary>
+        [HttpGet("gitlabUsers")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
+        [ProducesResponseType(typeof(IEnumerable<UserMergeRequestsStatisicsContract>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetGitlabUsers()
+        {
+            return await _cache.GetOrCreateAsync("statistic_users",
+                async cacheEntry => {
+                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+
+                    var dtos = await _gitLabService.GetUsers();                    
+
+                    return Ok(dtos);
+                });
+        }
     }
 }

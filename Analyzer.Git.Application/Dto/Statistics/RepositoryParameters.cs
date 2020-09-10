@@ -10,6 +10,8 @@
         /// </summary>
         public string Name { get; set; }
 
+        public string WebUI { get; set; }
+
         /// <summary>
         /// Полный путь к репозиторию
         /// </summary>

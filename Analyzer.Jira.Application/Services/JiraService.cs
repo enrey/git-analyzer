@@ -29,12 +29,6 @@ namespace JiraAnalyzer.Web.Api.Services
 
             return Combine(issues);
         }
-        public IList<JiraUser> GetUsers()
-        {
-            var users = _jiraLoader.GetAllUsersFromGroup();
-
-            return users;
-        }
 
         public IList<Info> GetJiraInfo(DateTimeOffset from, DateTimeOffset till)
         {
@@ -43,6 +37,23 @@ namespace JiraAnalyzer.Web.Api.Services
 
             return Combine(issues);
         }
+
+        public IList<Info> GetJiraInfoRelease(string query)
+        {
+            var issues = _jiraLoader.GetIssuesRelease(query);
+            _logger.LogInformation($"Total issues: {issues.Count}");
+
+            return Combine(issues);
+        }
+
+        public IList<JiraUser> GetUsers()
+        {
+            var users = _jiraLoader.GetAllUsersFromGroup();
+
+            return users;
+        }
+
+
 
         private IList<Info> Combine(IList<Issue> issues)
         {

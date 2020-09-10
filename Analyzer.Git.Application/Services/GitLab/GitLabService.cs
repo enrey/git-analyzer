@@ -38,17 +38,17 @@ namespace GitAnalyzer.Application.Services.GitLab
                 .Select(ri => new { ri.Name, Url = ri.Url.ToLower() })
                 .ToList();
 
-            var client = new GitLabClient(
-                _gitLabConfig.BaseUrl, 
-                _gitLabConfig.PrivateToken);
-            
+            var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
+
             var users = (await client.Users.GetAsync())
-                .Select(u => new { u.Id, u.Email })
+                .Select(u => new { u.Id, u.Email, u.Username })
                 .ToList();
 
-            var repos = (await client.Projects.GetAsync())
+            var projects = (await client.Projects.GetAsync());
+
+            var repos = projects
                 .Where(pr => configRepos.Select(cr => cr.Url).Contains(pr.HttpUrlToRepo.ToLower()))
-                .Join(configRepos, loaded => loaded.HttpUrlToRepo, cfgRepo => cfgRepo.Url, (loaded, cfgRepo) => new 
+                .Join(configRepos, loaded => loaded.HttpUrlToRepo, cfgRepo => cfgRepo.Url, (loaded, cfgRepo) => new
                 {
                     loaded.Id,
                     cfgRepo.Name
@@ -60,7 +60,7 @@ namespace GitAnalyzer.Application.Services.GitLab
                 options.State = QueryMergeRequestState.All;
                 options.CreatedAfter = startDate.AddMonths(-1);
             }))
-            .Select(mr => new 
+            .Select(mr => new
             {
                 mr.ProjectId,
                 AuthorId = mr.Author.Id,
@@ -116,31 +116,46 @@ namespace GitAnalyzer.Application.Services.GitLab
                     Created = creationData.FirstOrDefault(cd => cd.ProjectId == p.ProjectId && cd.UserId == p.UserId)?.Created ?? 0,
                     Merged = mergeData.FirstOrDefault(cd => cd.ProjectId == p.ProjectId && cd.UserId == p.UserId)?.Merged ?? 0
                 })
-                .Join(users, stat => stat.UserId, user => user.Id, (stat, user) => new 
+                .Join(users, stat => stat.UserId, user => user.Id, (stat, user) => new
                 {
-                    ProjectId = int.Parse(stat.ProjectId), 
+                    ProjectId = int.Parse(stat.ProjectId),
                     stat.UserId,
                     user.Email,
+                    user.Username,
                     stat.Created,
                     stat.Merged
                 })
-                .Join(repos, stat => stat.ProjectId, repo => repo.Id, (stat, repo) => new  
-                { 
+                .Join(repos, stat => stat.ProjectId, repo => repo.Id, (stat, repo) => new
+                {
                     RepositoryName = repo.Name,
                     Email = stat.Email,
+                    Username = stat.Username,
                     Opened = stat.Created,
                     Merged = stat.Merged
                 })
-                .GroupBy(o=>o.Email)
-                .Select(o=> new UserMergeRequestsStatisicsDto { 
-                    Email= o.Key,
+                .GroupBy(o => o.Email)
+                .Select(o => new UserMergeRequestsStatisicsDto
+                {
+                    Email = o.Key,
+                    Username = o.Select(i => i.Username).First(), // TODO: несколько реп может быть
                     OpenedTotal = o.Sum(i => i.Opened),
                     MergedTotal = o.Sum(i => i.Merged),
-                    Items = o.Select(i=> new UserMergeRequestsStatisicsItemDto {Merged = i.Merged, Opened = i.Opened, RepositoryName = i.RepositoryName } ).ToList()
+                    Items = o.Select(i => new UserMergeRequestsStatisicsItemDto { Merged = i.Merged, Opened = i.Opened, RepositoryName = i.RepositoryName }).ToList()
                 })
                 .ToList();
 
             return statistics;
+        }
+
+        public async Task<IEnumerable<UsersDto>> GetUsers()
+        {
+            var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
+
+            var users = (await client.Users.GetAsync())
+                .Select(u => new UsersDto { Email = u.Email, Username = u.Username, Url = _gitLabConfig.WebUrl + u.Username })
+                .ToList();
+
+            return users;
         }
     }
 }
