@@ -18,6 +18,7 @@ namespace GitAnalyzer.Web.Application.MapperProfiles
 
             CreateMap<PersonWorkEstimateDto, PersonWorkEstimateContract>();
             CreateMap<RepositoryWorkEstimateDto, RepositoryWorkEstimateContract>();
+            CreateMap<RepositoryLastCommitDto, RepositoryLastCommitContract>();
         }
     }
 }

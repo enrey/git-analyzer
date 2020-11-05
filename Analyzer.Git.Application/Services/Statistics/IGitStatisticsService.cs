@@ -29,5 +29,12 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<RepositoryWorkEstimateDto>> GetWorkSessionsEstimate(DateTimeOffset startDate, DateTimeOffset endDate);
+
+        /// <summary>
+        /// Возвращает последние коммиты репозиториев
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync();
+        
     }
 }
