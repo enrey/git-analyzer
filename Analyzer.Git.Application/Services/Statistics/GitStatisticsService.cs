@@ -83,6 +83,47 @@ namespace GitAnalyzer.Application.Services.Statistics
         }
 
         /// <summary>
+        /// Возвращает последние коммиты репозиториев
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
+        {
+            var validRepos = GetAllRepositoriesParameters()
+                .Where(ri => Repository.IsValid(ri.RepoPath));
+
+            var result = new List<RepositoryLastCommitDto>();
+
+            if (!validRepos.Any())
+                throw new Exception("Отсутствуют клонированные репозитории");
+
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(validRepos,
+                    ri =>
+                    {
+                        var commit = new Repository(ri.RepoPath).Head.Tip;
+
+                        var repoCommits = new RepositoryLastCommitDto
+                        {
+                            RepositoryName = ri.Name,
+                            RepositoryHash = commit?.Sha,
+                            RepositoryDate = commit?.Author?.When,
+                        };
+
+                        lock (_locker)
+                        {
+                            result.Add(repoCommits);
+                        }
+                    });
+
+            });
+
+            return result.OrderBy(r => r.RepositoryName).ToList();
+        }
+
+        /// <summary>
         /// Обновление всех репозиториев
         /// </summary>
         public async Task UpdateAllRepositories()

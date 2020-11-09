@@ -48,7 +48,8 @@ namespace GitAnalyzer.Web.Api.Controllers
         public async Task<IActionResult> Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             return await _cache.GetOrCreateAsync("statistic" + startDate.DateTime.ToShortDateString() + "/" + endDate.DateTime.ToShortDateString(),
-                async cacheEntry => {
+                async cacheEntry =>
+                {
                     cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
 
                     var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
@@ -57,6 +58,21 @@ namespace GitAnalyzer.Web.Api.Controllers
                     return Ok(result);
                 });
         }
+
+        /// <summary>
+        /// Получение последнего коммита GIT репозиториев
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("repositories-commits")]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryLastCommitContract>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetLastCommits()
+        {
+            var commits = await _gitStatisticsService.GetAllRepositoriesLastCommitAsync();
+            var result = _mapper.Map<IEnumerable<RepositoryLastCommitContract>>(commits);
+
+            return Ok(result);
+        }
+
 
         /// <summary>
         /// Обновление GIT репозиториев
