@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using GitAnalyzer.Application.Dto.Statistics;
 using GitAnalyzer.Application.Services.GitLab;
 using GitAnalyzer.Web.Contracts.GitLab;
 using Microsoft.AspNetCore.Http;
@@ -45,7 +46,8 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
         public async Task<IActionResult> GetMergeRequests(DateTime startDate, DateTime endDate)
         {
             return await _cache.GetOrCreateAsync("statistic" + startDate.ToShortDateString() + "/" + endDate.ToShortDateString(),
-                async cacheEntry => {
+                async cacheEntry =>
+                {
                     cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
 
                     var dtos = await _gitLabService.GetMergeRequestsStatistics(startDate, endDate);
@@ -65,13 +67,27 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
         public async Task<IActionResult> GetGitlabUsers()
         {
             return await _cache.GetOrCreateAsync("statistic_users",
-                async cacheEntry => {
+                async cacheEntry =>
+                {
                     cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
 
-                    var dtos = await _gitLabService.GetUsers();                    
+                    var dtos = await _gitLabService.GetUsers();
 
                     return Ok(dtos);
                 });
+        }
+
+
+        /// <summary>
+        /// Возвращает последние коммиты репозиториев GitLab'а
+        /// </summary>
+        [HttpGet("gitlab-repositories-commits")]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryLastCommitDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetGitlabAllRepositoriesLastCommit()
+        {
+            var commits = await _gitLabService.GetRepositoriesLastCommit();
+
+            return Ok(commits);
         }
     }
 }

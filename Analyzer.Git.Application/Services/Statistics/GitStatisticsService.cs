@@ -85,8 +85,6 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// <summary>
         /// Возвращает последние коммиты репозиториев
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
         {

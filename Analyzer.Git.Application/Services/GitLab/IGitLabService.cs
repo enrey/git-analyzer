@@ -1,4 +1,5 @@
 ﻿using GitAnalyzer.Application.Dto.GitLab;
+using GitAnalyzer.Application.Dto.Statistics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace GitAnalyzer.Application.Services.GitLab
         /// Получить всех пользователей
         /// </summary>
         Task<IEnumerable<UsersDto>> GetUsers();
+
+        /// <summary>
+        /// Получить последние коммиты репозиториев GitLab'а
+        /// </summary>
+        Task<IEnumerable<RepositoryLastCommitDto>> GetRepositoriesLastCommit();
 
     }
 }
