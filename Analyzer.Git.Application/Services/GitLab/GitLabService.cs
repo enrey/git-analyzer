@@ -2,14 +2,13 @@
 using GitAnalyzer.Application.Dto.GitLab;
 using GitAnalyzer.Application.Dto.Statistics;
 using GitLabApiClient;
-using GitLabApiClient.Models.Branches.Responses;
 using GitLabApiClient.Models.MergeRequests.Requests;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace GitAnalyzer.Application.Services.GitLab
 {
@@ -176,19 +175,21 @@ namespace GitAnalyzer.Application.Services.GitLab
                 .Where(pr => configReposUrls.Contains(pr.HttpUrlToRepo.ToLower()))
                 .Select(pr => new { pr.Id, pr.Name, pr.DefaultBranch });
 
-            var result = new List<RepositoryLastCommitDto>();
+            var result = new ConcurrentBag<RepositoryLastCommitDto>();
 
-            foreach (var pr in projects)
+            await Task.WhenAll(projects.Select(async pr =>
             {
-                var headBranch = (await client.Branches.GetAsync(pr.Id, HttpUtility.UrlEncode(pr.DefaultBranch))).Commit;
+                var lastCommit = pr.DefaultBranch.Contains("/") ?
+                    (await client.Commits.GetAsync(pr.Id))[0] :
+                    await client.Commits.GetAsync(pr.Id, pr.DefaultBranch);
 
                 result.Add(new RepositoryLastCommitDto
                 {
                     RepositoryName = pr.Name,
-                    RepositoryHash = headBranch.Id,
-                    RepositoryDate = DateTimeOffset.Parse(headBranch.CommittedDate)
+                    RepositoryHash = lastCommit.Id,
+                    RepositoryDate = lastCommit.CommittedDate
                 });
-            }
+            }));
 
             return result.OrderBy(r => r.RepositoryName).ToList();
         }
