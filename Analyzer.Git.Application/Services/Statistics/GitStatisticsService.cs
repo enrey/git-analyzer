@@ -88,26 +88,34 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
         {
-            var validRepos = GetAllRepositoriesParameters()
-                .Where(ri => Repository.IsValid(ri.RepoPath));
+            var repos = _repositoriesConfig.ReposInfo
+                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}"))
+                .Select(rp => new
+                {
+                    rp.Name,
+                    rp.Url,
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                })
+                .ToList();
+
+            if (!repos.Any())
+                throw new Exception("Отсутствуют клонированные репозитории");
 
             var result = new List<RepositoryLastCommitDto>();
 
-            if (!validRepos.Any())
-                throw new Exception("Отсутствуют клонированные репозитории");
-
             await Task.Run(() =>
             {
-                Parallel.ForEach(validRepos,
-                    ri =>
+                Parallel.ForEach(repos,
+                    rp =>
                     {
-                        var commit = new Repository(ri.RepoPath).Head.Tip;
+                        var commit = new Repository(rp.RepoPath).Head.Tip;
 
                         var repoCommits = new RepositoryLastCommitDto
                         {
-                            RepositoryName = ri.Name,
-                            RepositoryHash = commit?.Sha,
-                            RepositoryDate = commit?.Author?.When,
+                            RepositoryName = rp.Name,
+                            RepositoryUrl = rp.Url,
+                            Hash = commit?.Sha,
+                            Date = commit?.Author?.When,
                         };
 
                         lock (_locker)

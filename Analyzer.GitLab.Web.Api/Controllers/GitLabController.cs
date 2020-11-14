@@ -82,12 +82,18 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
         /// Возвращает последние коммиты репозиториев GitLab'а
         /// </summary>
         [HttpGet("gitlab-repositories-commits")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryLastCommitDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetGitlabAllRepositoriesLastCommit()
         {
-            var commits = await _gitLabService.GetRepositoriesLastCommit();
+            return await _cache.GetOrCreateAsync("gitlab-repos-commits", async cacheEntry =>
+            {
+                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
 
-            return Ok(commits);
+                var commits = await _gitLabService.GetRepositoriesLastCommit();
+
+                return Ok(commits);
+            });
         }
     }
 }

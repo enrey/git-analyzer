@@ -173,7 +173,7 @@ namespace GitAnalyzer.Application.Services.GitLab
 
             var projects = (await client.Projects.GetAsync())
                 .Where(pr => configReposUrls.Contains(pr.HttpUrlToRepo.ToLower()))
-                .Select(pr => new { pr.Id, pr.Name, pr.DefaultBranch });
+                .Select(pr => new { pr.Id, pr.Name, pr.HttpUrlToRepo, pr.DefaultBranch });
 
             var result = new ConcurrentBag<RepositoryLastCommitDto>();
 
@@ -186,8 +186,9 @@ namespace GitAnalyzer.Application.Services.GitLab
                 result.Add(new RepositoryLastCommitDto
                 {
                     RepositoryName = pr.Name,
-                    RepositoryHash = lastCommit.Id,
-                    RepositoryDate = lastCommit.CommittedDate
+                    RepositoryUrl = pr.HttpUrlToRepo,
+                    Hash = lastCommit.Id,
+                    Date = lastCommit.CommittedDate
                 });
             }));
 
