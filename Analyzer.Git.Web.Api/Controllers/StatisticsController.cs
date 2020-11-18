@@ -88,6 +88,19 @@ namespace GitAnalyzer.Web.Api.Controllers
         }
 
         /// <summary>
+        /// Обновление GIT репозитория
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("update-repositories/{repositoryUrl}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UpdateRepositories(string repositoryUrl)
+        {
+            await _gitStatisticsService.UpdateRepository(repositoryUrl);
+
+            return NoContent();
+        }
+
+        /// <summary>
         /// Оценки затраченного на работу времени
         /// </summary>
         /// <param name="startDate"></param>
