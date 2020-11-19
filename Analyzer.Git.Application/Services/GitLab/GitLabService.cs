@@ -173,15 +173,13 @@ namespace GitAnalyzer.Application.Services.GitLab
 
             var projects = (await client.Projects.GetAsync())
                 .Where(pr => configReposUrls.Contains(pr.HttpUrlToRepo.ToLower()))
-                .Select(pr => new { pr.Id, pr.Name, pr.HttpUrlToRepo, pr.DefaultBranch });
+                .Select(pr => new { pr.Id, pr.Name, pr.HttpUrlToRepo });
 
             var result = new ConcurrentBag<RepositoryLastCommitDto>();
 
             await Task.WhenAll(projects.Select(async pr =>
             {
-                var lastCommit = pr.DefaultBranch.Contains("/") ?
-                    (await client.Commits.GetAsync(pr.Id))[0] :
-                    await client.Commits.GetAsync(pr.Id, pr.DefaultBranch);
+                var lastCommit = (await client.Commits.GetAsync(pr.Id))[0];
 
                 result.Add(new RepositoryLastCommitDto
                 {
