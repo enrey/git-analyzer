@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace GitAnalyzer.Application.Services.Statistics
 {
@@ -85,31 +86,37 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// <summary>
         /// Возвращает последние коммиты репозиториев
         /// </summary>
-        /// <param name="startDate"></param>
-        /// <param name="endDate"></param>
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
         {
-            var validRepos = GetAllRepositoriesParameters()
-                .Where(ri => Repository.IsValid(ri.RepoPath));
+            var repos = _repositoriesConfig.ReposInfo
+                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}"))
+                .Select(rp => new
+                {
+                    rp.Name,
+                    rp.Url,
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                })
+                .ToList();
+
+            if (!repos.Any())
+                throw new Exception("Отсутствуют клонированные репозитории");
 
             var result = new List<RepositoryLastCommitDto>();
 
-            if (!validRepos.Any())
-                throw new Exception("Отсутствуют клонированные репозитории");
-
             await Task.Run(() =>
             {
-                Parallel.ForEach(validRepos,
-                    ri =>
+                Parallel.ForEach(repos,
+                    rp =>
                     {
-                        var commit = new Repository(ri.RepoPath).Head.Tip;
+                        var commit = new Repository(rp.RepoPath).Head.Tip;
 
                         var repoCommits = new RepositoryLastCommitDto
                         {
-                            RepositoryName = ri.Name,
-                            RepositoryHash = commit?.Sha,
-                            RepositoryDate = commit?.Author?.When,
+                            RepositoryName = rp.Name,
+                            RepositoryUrl = rp.Url,
+                            Hash = commit?.Sha,
+                            Date = commit?.Author?.When,
                         };
 
                         lock (_locker)
@@ -128,6 +135,7 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         public async Task UpdateAllRepositories()
         {
+
             _logger.LogInformation($"Updating repositories started");
 
             // TODO: Если токена нет то использовать логин/пароль Credentials = new UsernamePasswordCredentials { Username = info.Username, Password = info.Password }
@@ -150,13 +158,80 @@ namespace GitAnalyzer.Application.Services.Statistics
                 Parallel.ForEach(reposInfo, new ParallelOptions { MaxDegreeOfParallelism = MAX_PARALLEL }, info =>
                 {
                     if (!Repository.IsValid(info.RepoPath))
-                        CloneRepository(info.RepoUrl, info.RepoPath, info.Credentials);
+                        try
+                        {
+                            CloneRepository(info.RepoUrl, info.RepoPath, info.Credentials);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Clonning error! Repository: \"{info.RepoUrl}\". Message: {ex.Message}");
+                        }
                     else
-                        PullRepository(info.RepoPath, info.Credentials);
+                        try
+                        {
+                            PullRepository(info.RepoPath, info.Credentials);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Pulling error! Repository: \"{info.RepoPath}\". Message: {ex.Message}");
+                        }
                 });
             });
 
             _logger.LogInformation($"Updating repositories ended");
+
+
+        }
+
+        /// <summary>
+        /// Обновление репозитория
+        /// </summary>
+        public async Task UpdateRepository(string repoPath)
+        {
+            // TODO: Если токена нет то использовать логин/пароль Credentials = new UsernamePasswordCredentials { Username = info.Username, Password = info.Password }
+            var defaultCreds = new UsernamePasswordCredentials
+            {
+                Username = "token",
+                Password = _repositoriesConfig.GitlabAuthToken
+            };
+
+            var repo = _repositoriesConfig.ReposInfo
+                .Where(rp => rp.Url == HttpUtility.UrlDecode(repoPath))
+                .Select(rp => new
+                {
+                    rp.Name,
+                    RepoUrl = rp.Url,
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                    Credentials = defaultCreds
+                })
+                .First();
+
+            _logger.LogInformation($"Updating repository {repo.Name} started");
+
+            await Task.Run(() =>
+            {
+
+                if (!Repository.IsValid(repo.RepoPath))
+                    try
+                    {
+                        CloneRepository(repo.RepoUrl, repo.RepoPath, repo.Credentials);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Clonning error! Repository: \"{repo.RepoUrl}\". Message: {ex.Message}");
+                    }
+                else
+                    try
+                    {
+                        PullRepository(repo.RepoPath, repo.Credentials);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Pulling error! Repository: \"{repo.RepoPath}\". Message: {ex.Message}");
+                    }
+            });
+
+            _logger.LogInformation($"Updating repository {repo.Name} ended");
         }
 
         /// <summary>
@@ -300,28 +375,20 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         private void CloneRepository(string repoUrl, string repoPath, UsernamePasswordCredentials credentials)
         {
-            try
+            if (!Directory.Exists(repoPath))
+                Directory.CreateDirectory(repoPath);
+
+            var cloneOptions = new CloneOptions
             {
-                if (!Directory.Exists(repoPath))
-                    Directory.CreateDirectory(repoPath);
+                IsBare = false,
+                CredentialsProvider = (_url, _user, _cred) => credentials
+            };
 
-                var cloneOptions = new CloneOptions
-                {
-                    IsBare = false,
-                    CredentialsProvider = (_url, _user, _cred) => credentials
-                };
+            _logger.LogInformation($"Cloning started: \"{repoUrl}\"");
 
-                _logger.LogInformation($"Cloning started: \"{repoUrl}\"");
+            Repository.Clone(repoUrl, repoPath, cloneOptions);
 
-                Repository.Clone(repoUrl, repoPath, cloneOptions);
-
-                _logger.LogInformation($"Cloning ended: \"{repoUrl}\"");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Clonning error! Repository: \"{repoUrl}\". Message: {ex.Message}");
-            }
+            _logger.LogInformation($"Cloning ended: \"{repoUrl}\"");
         }
 
         /// <summary>
@@ -361,33 +428,26 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         private void PullRepository(string repoPath, UsernamePasswordCredentials credentials)
         {
-            try
-            {
-                using var repo = new Repository(repoPath);
+            using var repo = new Repository(repoPath);
 
-                var pullOptions = new PullOptions
+            var pullOptions = new PullOptions
+            {
+                FetchOptions = new FetchOptions
                 {
-                    FetchOptions = new FetchOptions
-                    {
-                        Prune = true,
-                        CredentialsProvider = (_url, _user, _cred) => credentials
-                    }
-                };
+                    Prune = true,
+                    CredentialsProvider = (_url, _user, _cred) => credentials
+                }
+            };
 
-                var signature = new Signature(
-                    new Identity(_repositoriesConfig.MergeUserName, _repositoriesConfig.MergeUserEmail),
-                    DateTimeOffset.Now);
+            var signature = new Signature(
+                new Identity(_repositoriesConfig.MergeUserName, _repositoriesConfig.MergeUserEmail),
+                DateTimeOffset.Now);
 
-                _logger.LogInformation($"Pulling started: \"{repoPath}\"");
+            _logger.LogInformation($"Pulling started: \"{repoPath}\"");
 
-                Commands.Pull(repo, signature, pullOptions);
+            Commands.Pull(repo, signature, pullOptions);
 
-                _logger.LogInformation($"Pulling ended: \"{repoPath}\"");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Pulling error! Repository: \"{repoPath}\". Message: {ex.Message}");
-            }
+            _logger.LogInformation($"Pulling ended: \"{repoPath}\"");
         }
 
         /// <summary>

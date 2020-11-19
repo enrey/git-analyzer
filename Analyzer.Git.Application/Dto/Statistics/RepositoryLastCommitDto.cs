@@ -14,13 +14,18 @@ namespace GitAnalyzer.Application.Dto.Statistics
         public string RepositoryName { get; set; }
 
         /// <summary>
+        /// Url путь до репозитория
+        /// </summary>
+        public string RepositoryUrl { get; set; }
+
+        /// <summary>
         /// Хеш последнего коммита из репозитория
         /// </summary>
-        public string RepositoryHash { get; set; }
+        public string Hash { get; set; }
 
         /// <summary>
         /// Дата последнего коммита из репозитория
         /// </summary>
-        public DateTimeOffset? RepositoryDate { get; set; }
+        public DateTimeOffset? Date { get; set; }
     }
 }

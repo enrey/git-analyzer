@@ -1,9 +1,11 @@
 ﻿using GitAnalyzer.Application.Configuration;
 using GitAnalyzer.Application.Dto.GitLab;
+using GitAnalyzer.Application.Dto.Statistics;
 using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -156,6 +158,41 @@ namespace GitAnalyzer.Application.Services.GitLab
                 .ToList();
 
             return users;
+        }
+
+        /// <summary>
+        /// Получить последние коммиты репозиториев GitLab'а
+        /// </summary>
+        public async Task<IEnumerable<RepositoryLastCommitDto>> GetRepositoriesLastCommit()
+        {
+            var configReposUrls = _repositoriesConfig.ReposInfo
+                .Select(ri => ri.Url.ToLower())
+                .ToList();
+
+            var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
+
+            var projects = (await client.Projects.GetAsync())
+                .Where(pr => configReposUrls.Contains(pr.HttpUrlToRepo.ToLower()))
+                .Select(pr => new { pr.Id, pr.Name, pr.HttpUrlToRepo, pr.DefaultBranch });
+
+            var result = new ConcurrentBag<RepositoryLastCommitDto>();
+
+            await Task.WhenAll(projects.Select(async pr =>
+            {
+                var lastCommit = pr.DefaultBranch.Contains("/") ?
+                    (await client.Commits.GetAsync(pr.Id))[0] :
+                    await client.Commits.GetAsync(pr.Id, pr.DefaultBranch);
+
+                result.Add(new RepositoryLastCommitDto
+                {
+                    RepositoryName = pr.Name,
+                    RepositoryUrl = pr.HttpUrlToRepo,
+                    Hash = lastCommit.Id,
+                    Date = lastCommit.CommittedDate
+                });
+            }));
+
+            return result.OrderBy(r => r.RepositoryName).ToList();
         }
     }
 }

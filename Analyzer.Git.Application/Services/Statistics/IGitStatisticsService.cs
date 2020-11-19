@@ -24,6 +24,11 @@ namespace GitAnalyzer.Application.Services.Statistics
         Task UpdateAllRepositories();
 
         /// <summary>
+        /// Обновление репозитория
+        /// </summary>
+        Task UpdateRepository(string repoUrl);
+
+        /// <summary>
         /// Суммирует часы по дням. 
         /// Предполагаем, что работа за день началась за 2 часа до первого коммита и окончилась последним коммитом
         /// </summary>
@@ -35,6 +40,6 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync();
-        
+
     }
 }
