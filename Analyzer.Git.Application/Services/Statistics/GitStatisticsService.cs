@@ -109,7 +109,11 @@ namespace GitAnalyzer.Application.Services.Statistics
                 Parallel.ForEach(repos,
                     rp =>
                     {
-                        var commit = new Repository(rp.RepoPath).Head.Tip;
+                        var repository = new Repository(rp.RepoPath);
+
+                        // iterate all branches (git log --all)
+                        var filter = new CommitFilter { IncludeReachableFrom = repository.Branches };
+                        var commit = repository.Commits.QueryBy(filter).First();
 
                         var repoCommits = new RepositoryLastCommitDto
                         {
@@ -445,7 +449,7 @@ namespace GitAnalyzer.Application.Services.Statistics
 
             _logger.LogInformation($"Pulling started: \"{repoPath}\"");
 
-            Commands.Pull(repo, signature, pullOptions);
+            var pullResult = Commands.Pull(repo, signature, pullOptions);
 
             _logger.LogInformation($"Pulling ended: \"{repoPath}\"");
         }
