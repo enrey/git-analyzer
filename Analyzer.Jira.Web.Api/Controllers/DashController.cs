@@ -1,6 +1,6 @@
-﻿using Atlassian.Jira;
-using JiraAnalyzer.Web.Api.Dto;
-using JiraAnalyzer.Web.Api.Services;
+﻿using Analyzer.Jira.Application.Dto;
+using Analyzer.Jira.Application.Services;
+using Atlassian.Jira;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;

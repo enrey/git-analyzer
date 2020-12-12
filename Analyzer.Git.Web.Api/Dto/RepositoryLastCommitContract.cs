@@ -1,7 +1,7 @@
 using System;
 using LibGit2Sharp;
 
-namespace GitAnalyzer.Web.Contracts.Statistics
+namespace Analyzer.Git.Web.Api.Dto
 {
     /// <summary>
     /// DTO последнего коммита в репозитории

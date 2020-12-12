@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using GitAnalyzer.Application.Configuration;
-using GitAnalyzer.Application.Services.GitLab;
-using GitAnalyzer.Web.Application.MapperProfiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Analyzer.Git.Application.Services.GitLab;
+using Analyzer.Git.Application.Configuration;
+using Analyzer.GitLab.Web.Api.Mapper;
 
-namespace GitAnalyzer.Web.GitLab.Api
+namespace Analyzer.GitLab.Web.Api
 {
     public class ServicesConfigurator
     {
@@ -13,7 +13,6 @@ namespace GitAnalyzer.Web.GitLab.Api
         {
             services.AddTransient<IGitLabService, GitLabService>();
 
-            services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
             services.Configure<GitLabConfig>(configuration.GetSection("GitLab"));
 
             services.AddAutoMapper(typeof(GitLabMapperProfile));

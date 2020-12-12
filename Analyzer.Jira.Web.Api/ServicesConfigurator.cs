@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using JiraAnalyzer.Web.Api.Services;
+using Analyzer.Jira.Application.Configuration;
+using Analyzer.Jira.Application.Services;
 
 namespace JiraAnalyzer.Web.Api
 {

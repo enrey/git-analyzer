@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GitAnalyzer.Application.Configuration
+namespace Analyzer.Git.Application.Configuration
 {
     public class RepositoriesConfig
     {

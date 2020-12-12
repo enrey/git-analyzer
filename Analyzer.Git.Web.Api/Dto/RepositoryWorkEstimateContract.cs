@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GitAnalyzer.Web.Contracts.Statistics
+namespace Analyzer.Git.Web.Api.Dto
 {
     public class RepositoryWorkEstimateContract
     {

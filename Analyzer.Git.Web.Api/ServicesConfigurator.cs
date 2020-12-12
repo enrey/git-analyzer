@@ -1,13 +1,12 @@
 ﻿using AutoMapper;
-using GitAnalyzer.Application.Configuration;
-using GitAnalyzer.Application.Services.GitLab;
-using GitAnalyzer.Web.Application.MapperProfiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using GitAnalyzer.Application.Services.Hosted;
-using GitAnalyzer.Application.Services.Statistics;
+using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Application.Configuration;
+using Analyzer.Git.Web.Api.Hosted;
+using Analyzer.Git.Web.Api.Mapper;
 
-namespace GitAnalyzer.Web.Api
+namespace Analyzer.Git.Web.Api
 {
     public class ServicesConfigurator
     {

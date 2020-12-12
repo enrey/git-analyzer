@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "GitAnalyzer.Web.Api": {
+    "Analyzer.Git.Web.Api": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

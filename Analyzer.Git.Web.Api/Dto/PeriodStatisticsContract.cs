@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace GitAnalyzer.Web.Contracts.Statistics
+namespace Analyzer.Git.Web.Api.Dto
 {
     /// <summary>
     /// Контракт статистики за период

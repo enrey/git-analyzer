@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using GitAnalyzer.Application.Dto.GitLab;
-using GitAnalyzer.Web.Contracts.GitLab;
+﻿using Analyzer.Git.Application.Dto.GitLab;
+using Analyzer.GitLab.Web.Api.Dto;
+using AutoMapper;
 
-namespace GitAnalyzer.Web.Application.MapperProfiles
+namespace Analyzer.GitLab.Web.Api.Mapper
 {
     /// <summary>
     /// Профиль маппинга для данных GitLab'а

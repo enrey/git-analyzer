@@ -1,11 +1,11 @@
-﻿using Atlassian.Jira;
-using JiraAnalyzer.Web.Api.Dto;
+﻿using Analyzer.Jira.Application.Dto;
+using Atlassian.Jira;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace JiraAnalyzer.Web.Api.Services
+namespace Analyzer.Jira.Application.Services
 {
     public class JiraService
     {
@@ -32,15 +32,7 @@ namespace JiraAnalyzer.Web.Api.Services
 
         public IList<Info> GetJiraInfo(DateTimeOffset from, DateTimeOffset till)
         {
-            var issues = _jiraLoader.GetIssuesDuring(from, till);
-            _logger.LogInformation($"Total issues: {issues.Count}");
-
-            return Combine(issues);
-        }
-
-        public IList<Info> GetJiraInfoRelease(string query)
-        {
-            var issues = _jiraLoader.GetIssuesRelease(query);
+            var issues = _jiraLoader.GetIssuesDuring(from, till).Result;
             _logger.LogInformation($"Total issues: {issues.Count}");
 
             return Combine(issues);
@@ -52,8 +44,6 @@ namespace JiraAnalyzer.Web.Api.Services
 
             return users;
         }
-
-
 
         private IList<Info> Combine(IList<Issue> issues)
         {
@@ -68,8 +58,9 @@ namespace JiraAnalyzer.Web.Api.Services
         private IEnumerable<IssueAndLogs> GetLogs(IList<Issue> issues)
         {
             return issues.AsParallel()
-            .WithDegreeOfParallelism(PARALLEL_DEGREE)
-            .Select(issue => new IssueAndLogs { Issue = issue, Logs = _jiraLoader.GetLogs(issue) });
+                .WithDegreeOfParallelism(PARALLEL_DEGREE)
+                .Select(issue => new IssueAndLogs { Issue = issue, Logs = issue.GetChangeLogsAsync().Result.ToList() })
+                .ToList();
         }
     }
 }

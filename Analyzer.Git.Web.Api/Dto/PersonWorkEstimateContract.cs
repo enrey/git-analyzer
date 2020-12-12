@@ -1,4 +1,4 @@
-﻿namespace GitAnalyzer.Web.Contracts.Statistics
+﻿namespace Analyzer.Git.Web.Api.Dto
 {
     /// <summary>
     /// Контракт для данных оценки затраченного времени

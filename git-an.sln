@@ -7,15 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "git-an", "git-an\git-an.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Git.Web.Api", "Analyzer.Git.Web.Api\Analyzer.Git.Web.Api.csproj", "{44CCA717-6A5F-4499-90AB-FE2A03995E01}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Application", "Analyzer.Application\Analyzer.Application.csproj", "{22C0C740-6652-4835-A6F1-2D81818904B1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Git.Application", "Analyzer.Git.Application\Analyzer.Git.Application.csproj", "{DF94EA75-C8C1-4F04-A019-CA7236344470}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Git.IntegrationTests", "Analyzer.Git.IntegrationTests\Analyzer.Git.IntegrationTests.csproj", "{611010A4-502E-4218-8B6E-766AEA3F791F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.GitLab.Web.Api", "Analyzer.GitLab.Web.Api\Analyzer.GitLab.Web.Api.csproj", "{7B6BBFA0-0E07-4A04-B8B0-AB3C9199BFC0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{E8A5AC18-A7CF-4387-AD1F-8D230D81FF70}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitLabApiClient", "GitLabApiClient\GitLabApiClient.csproj", "{0145D84C-703A-4362-B4BF-D2EE837AD410}"
 EndProject
@@ -33,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gitlab", "Gitlab", "{4E81D1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Gitlab.IntegrationTests", "Analyzer.Gitlab.IntegrationTests\Analyzer.Gitlab.IntegrationTests.csproj", "{48AC17B2-805D-449D-87C9-436677540CA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analyzer.Jira.Application", "Analyzer.Jira.Application\Analyzer.Jira.Application.csproj", "{E79CE1D8-C635-443C-916B-96C9D4386DC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Analyzer.Jira.Application", "Analyzer.Jira.Application\Analyzer.Jira.Application.csproj", "{E79CE1D8-C635-443C-916B-96C9D4386DC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +45,6 @@ Global
 		{44CCA717-6A5F-4499-90AB-FE2A03995E01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44CCA717-6A5F-4499-90AB-FE2A03995E01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44CCA717-6A5F-4499-90AB-FE2A03995E01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{22C0C740-6652-4835-A6F1-2D81818904B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22C0C740-6652-4835-A6F1-2D81818904B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22C0C740-6652-4835-A6F1-2D81818904B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22C0C740-6652-4835-A6F1-2D81818904B1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF94EA75-C8C1-4F04-A019-CA7236344470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF94EA75-C8C1-4F04-A019-CA7236344470}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF94EA75-C8C1-4F04-A019-CA7236344470}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -95,13 +87,9 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CB927615-5935-40DB-AEA0-DE840ADC2C7F} = {A0C3571E-D386-40CF-89A7-A44A256CEACF}
-		{22C0C740-6652-4835-A6F1-2D81818904B1} = {E8A5AC18-A7CF-4387-AD1F-8D230D81FF70}
 		{DF94EA75-C8C1-4F04-A019-CA7236344470} = {A0C3571E-D386-40CF-89A7-A44A256CEACF}
-		{611010A4-502E-4218-8B6E-766AEA3F791F} = {A0C3571E-D386-40CF-89A7-A44A256CEACF}
 		{0145D84C-703A-4362-B4BF-D2EE837AD410} = {4E81D1E8-6FBF-492C-B03F-E23FB2546684}
 		{55D36261-54EF-4339-8DB5-973CDCE1F624} = {4E81D1E8-6FBF-492C-B03F-E23FB2546684}
-		{3BAEB8C7-BFFE-4400-B53B-9B2C36A2E840} = {01492A21-4AA2-46AD-9F6E-D2AEBEBAFF67}
-		{48AC17B2-805D-449D-87C9-436677540CA2} = {4E81D1E8-6FBF-492C-B03F-E23FB2546684}
 		{E79CE1D8-C635-443C-916B-96C9D4386DC3} = {01492A21-4AA2-46AD-9F6E-D2AEBEBAFF67}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

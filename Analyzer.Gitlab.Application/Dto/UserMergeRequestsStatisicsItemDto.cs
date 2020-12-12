@@ -1,9 +1,6 @@
-﻿namespace Analyzer.GitLab.Web.Api.Dto
+﻿namespace Analyzer.Git.Application.Dto.GitLab
 {
-    /// <summary>
-    /// Контракт данных о статистике мерджреквестов пользователя
-    /// </summary>
-    public class UserMergeRequestsStatisicsItemContract
+    public class UserMergeRequestsStatisicsItemDto
     {
         /// <summary>
         /// Репозиторий

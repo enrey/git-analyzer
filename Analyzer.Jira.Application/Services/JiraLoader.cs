@@ -1,18 +1,19 @@
-﻿using Atlassian.Jira;
+﻿using Analyzer.Jira.Application.Configuration;
+using Atlassian.Jira;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace JiraAnalyzer.Web.Api.Services
+namespace Analyzer.Jira.Application.Services
 {
     public class JiraLoader
     {
         private const int USER_STEP = 50;
-        private const int ISSUE_STEP = 100;
+        private const int ISSUE_STEP = 200;
         private readonly JiraConfig _jiraConfig;
-        private readonly Jira _jiraClient;
+        private readonly Atlassian.Jira.Jira _jiraClient;
 
         public JiraLoader(IOptionsMonitor<JiraConfig> jiraConfig)
         {
@@ -38,55 +39,42 @@ namespace JiraAnalyzer.Web.Api.Services
             return issues;
         }
 
-        public IList<Issue> GetIssuesDuring(DateTimeOffset from, DateTimeOffset till)
+        public async Task<IList<Issue>> GetIssuesDuring(DateTimeOffset from, DateTimeOffset till)
         {
             var strFrom = from.ToString("yyyy-MM-dd");
             var strTill = till.ToString("yyyy-MM-dd");
 
-            var task = GetIssuesAsync($"status was in (Разработка, \"На кодревью\", Переоткрыто) DURING(\"{strFrom}\", \"{strTill}\") ORDER BY status DESC");
-            task.Wait();
-
-            var issues = task.Result;
-
-            return issues;
-        }
-
-        public IList<Issue> GetIssuesRelease(string query)
-        {
-            var task = GetIssuesAsync(query);
-            task.Wait();
-
-            var issues = task.Result;
-
-            return issues;
-        }
-
-
-        public List<IssueChangeLog> GetLogs(Issue issue)
-        {
-            var task = GetLog(issue);
-            task.Wait();
-            return task.Result;
+            return await GetIssuesAsync($"status was in (Разработка, \"На кодревью\", Переоткрыто) DURING(\"{strFrom}\", \"{strTill}\") ORDER BY status DESC");
         }
 
         private async Task<IList<Issue>> GetIssuesAsync(string query)
         {
             var startAt = 0;
-            var total = ISSUE_STEP;
+            var ttlTask = SearchQuery(query, startAt, 1);
 
-            var all = new List<Issue>();
+            await Task.WhenAll(ttlTask);
 
+            var total = ttlTask.Result.TotalItems;
+            Console.WriteLine("Total issues to retreive: " + total);
+
+            var tasks = new List<Task<IPagedQueryResult<Issue>>>();
             while (startAt < total)
             {
-                var res = await SearchQuery(query, startAt, ISSUE_STEP);
-
-                all.AddRange(res.ToList());
+                var task = SearchQuery(query, startAt, ISSUE_STEP);
+                tasks.Add(task);
+                Console.WriteLine("Task: " + startAt);
 
                 startAt += ISSUE_STEP;
-                total = res.TotalItems;
             }
 
-            return all;
+            await Task.WhenAll(tasks);
+
+            var result = tasks
+                .Select(x => x.Result)
+                .SelectMany(o => o)
+                .ToList();
+
+            return result;
         }
 
         private async Task<IPagedQueryResult<Issue>> SearchQuery(string query, int skip, int take)
@@ -126,14 +114,9 @@ namespace JiraAnalyzer.Web.Api.Services
             return all;
         }
 
-        private Jira GetClient()
+        private Atlassian.Jira.Jira GetClient()
         {
-            return Jira.CreateRestClient(_jiraConfig.Host, _jiraConfig.Username, _jiraConfig.Pwd);
-        }
-
-        private static async Task<List<IssueChangeLog>> GetLog(Issue issue)
-        {
-            return (await issue.GetChangeLogsAsync()).ToList();
+            return Atlassian.Jira.Jira.CreateRestClient(_jiraConfig.Host, _jiraConfig.Username, _jiraConfig.Pwd);
         }
     }
 }

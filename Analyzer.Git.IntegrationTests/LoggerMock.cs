@@ -1,13 +1,13 @@
-﻿using Analyzer.Jira.Application.Services;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
+using Analyzer.Git.Application.Services.Statistics;
 
-namespace Analyzer.Jira.IntegrationTests
+namespace Analyzer.Git.IntegrationTests
 {
     /// <summary>
     /// Mock для логгера
     /// </summary>
-    public class LoggerMock : ILogger<JiraService>
+    public class LoggerMock : ILogger<GitStatisticsService>
     {
         public string Error { get; set; }
 

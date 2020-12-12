@@ -1,4 +1,4 @@
-﻿namespace GitAnalyzer.Application.Dto.Statistics
+﻿namespace Analyzer.Git.Application.Dto
 {
     /// <summary>
     /// DTO для данных оценки затраченного времени

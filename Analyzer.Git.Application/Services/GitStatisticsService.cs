@@ -1,7 +1,6 @@
-﻿using GitAnalyzer.Application.Configuration;
-using GitAnalyzer.Application.Dto.Statistics;
+﻿using Analyzer.Git.Application.Configuration;
+using Analyzer.Git.Application.Dto;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -11,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace GitAnalyzer.Application.Services.Statistics
+namespace Analyzer.Git.Application.Services.Statistics
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев
@@ -139,7 +138,6 @@ namespace GitAnalyzer.Application.Services.Statistics
         /// </summary>
         public async Task UpdateAllRepositories()
         {
-
             _logger.LogInformation($"Updating repositories started");
 
             // TODO: Если токена нет то использовать логин/пароль Credentials = new UsernamePasswordCredentials { Username = info.Username, Password = info.Password }

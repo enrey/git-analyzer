@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GitAnalyzer.Application.Dto.Statistics
+namespace Analyzer.Git.Application.Dto
 {
     /// <summary>
     /// DTO статистики за период

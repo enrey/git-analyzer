@@ -1,11 +1,11 @@
-﻿using GitAnalyzer.Application.Configuration;
-using GitAnalyzer.Application.Services.Statistics;
+﻿using Analyzer.Git.Application.Configuration;
+using Analyzer.Git.Application.Services.Statistics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Application.Services.Hosted
+namespace Analyzer.Git.Web.Api.Hosted
 {
     /// <summary>
     /// Self-hosted сервис для обновления репозиториев

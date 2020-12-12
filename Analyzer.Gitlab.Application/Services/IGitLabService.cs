@@ -1,10 +1,10 @@
-﻿using GitAnalyzer.Application.Dto.GitLab;
-using GitAnalyzer.Application.Dto.Statistics;
+﻿using Analyzer.Git.Application.Dto;
+using Analyzer.Git.Application.Dto.GitLab;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Application.Services.GitLab
+namespace Analyzer.Git.Application.Services.GitLab
 {
     /// <summary>
     /// Сервис для взаимодействия с GitLab
@@ -15,6 +15,11 @@ namespace GitAnalyzer.Application.Services.GitLab
         /// Получить статистику пользователей по мерджреквестам
         /// </summary>
         Task<IEnumerable<UserMergeRequestsStatisicsDto>> GetMergeRequestsStatistics(DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Получить статистику пользователей по мерджреквестам
+        /// </summary>
+        Task<IEnumerable<CommentsStatisicsDto>> GetMergeRequestsCommentsStatistics(DateTime startDate, DateTime endDate);
 
         /// <summary>
         /// Получить всех пользователей

@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using GitAnalyzer.Application.Dto.Statistics;
-using GitAnalyzer.Web.Contracts.Statistics;
+﻿using Analyzer.Git.Application.Dto;
+using Analyzer.Git.Web.Api.Dto;
+using AutoMapper;
 
-namespace GitAnalyzer.Web.Application.MapperProfiles
+namespace Analyzer.Git.Web.Api.Mapper
 {
     /// <summary>
     /// Профиль маппинга для DTO Statistics

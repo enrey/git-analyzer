@@ -1,13 +1,16 @@
-using GitAnalyzer.Application.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
-using GitAnalyzer.Application.Services.Statistics;
+using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Application.Configuration;
+using Microsoft.Extensions.Configuration;
+using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
-namespace GitAnalyzer.IntegrationTests
+namespace Analyzer.Git.IntegrationTests
 {
     public class GitStatisticsServiceTests
     {
@@ -19,56 +22,12 @@ namespace GitAnalyzer.IntegrationTests
         {
             _loggerMock = new LoggerMock();
 
-            var statisticsConfigMonitorMock = new Mock<IOptionsMonitor<StatisticsConfig>>();
-            statisticsConfigMonitorMock.Setup(cfg => cfg.CurrentValue).Returns(new StatisticsConfig { PeriodIntervalDays = 1 });
+            var builder = GetConfig();
+            var repoConfig = builder.GetService<IOptionsMonitor<RepositoriesConfig>>();
+            var statConfig = builder.GetService<IOptionsMonitor<StatisticsConfig>>();
+            var estConfig = builder.GetService<IOptionsMonitor<WorkEstimateConfig>>();
 
-            var repositoriesConfigMock = new Mock<IOptionsMonitor<RepositoriesConfig>>();
-            repositoriesConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new RepositoriesConfig
-            {
-                ReposFolder = "C:\\Test.Repos",
-                MergeUserName = "robotovya",
-                MergeUserEmail = "robotovya@it2g.ru",
-                ReposInfo = new[]
-                {
-                    //new RepositoryInfoConfig
-                    //{
-                    //    Name = "AVTOKOD",
-                    //    Url = "http://git.it2g.ru/avtokod/siv.avtokod.git",
-                    //    LocalPath = "siv.avtokod",
-                    //    Username = "",
-                    //    Password = ""
-                    //},
-                    //new RepositoryInfoConfig
-                    //{
-                    //    Name = "NPA",
-                    //    Url = "http://git.it2g.ru/npa/npa.git",
-                    //    LocalPath = "npa",
-                    //    Username = "",
-                    //    Password = ""
-                    //},
-                    new RepositoryInfoConfig
-                    {
-                        Name = "MMCSERV",
-                        Url = "http://git.it2g.ru/mmc/rvp-vnj.git",
-                        LocalPath = "rvp-vnj",
-                        Username = "",
-                        Password = ""
-                    }
-                }
-            }); 
-
-            var workEstimateConfigMock = new Mock<IOptionsMonitor<WorkEstimateConfig>>();
-            workEstimateConfigMock.Setup(cfg => cfg.CurrentValue).Returns(new WorkEstimateConfig
-            {
-                WorkDayHours = 8,
-                PaddingHours = 2
-            });
-
-            _service = new GitStatisticsService(
-                _loggerMock, 
-                statisticsConfigMonitorMock.Object, 
-                repositoriesConfigMock.Object, 
-                workEstimateConfigMock.Object);
+            _service = new GitStatisticsService(_loggerMock, statConfig, repoConfig, estConfig);
         }
 
         [Test]
@@ -84,49 +43,76 @@ namespace GitAnalyzer.IntegrationTests
         [Test]
         public async Task GetAllRepositoriesStatistics_Test()
         {
-            //Arrange
+            // Arrange
             var startDate = DateTime.Now.AddMonths(-1);
             var endDate = DateTime.Now;
 
-            //Act
+            // Act
             var result = await _service.GetAllRepositoriesStatisticsAsync(startDate, endDate);
+
+            // Assert 
+            Assert.IsTrue(result.Count() > 0);
         }
 
         [Test]
         public async Task GetWorkSessionsEstimate_Test()
         {
-            //Arrange
-            //var startDate = DateTime.Now.AddYears(-10);
-            //var startDate = new DateTime(2000, 1, 28);
+            // Arrange
             var startDate = DateTime.Now.AddMonths(-1);
             var endDate = DateTime.Now;
 
-            //Act
-            var result  = await _service.GetWorkSessionsEstimate(startDate, endDate);
-        }
-    }
+            // Act
+            var result = await _service.GetWorkSessionsEstimate(startDate, endDate);
 
-    /// <summary>
-    /// Mock הכÿ כמדדונא
-    /// </summary>
-    public class LoggerMock : ILogger<GitStatisticsService>
-    {
-        public string Error { get; set; }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            throw new NotImplementedException();
+            // Assert 
+            Assert.IsTrue(result.Count() > 0);
         }
 
-        public bool IsEnabled(LogLevel logLevel)
+        private ServiceProvider GetConfig()
         {
-            throw new NotImplementedException();
+            var configuration = LoadTestConfiguration();
+
+            var services = new ServiceCollection();
+            services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
+            services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
+            services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
+            var builder = services.BuildServiceProvider();
+
+            return builder;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        private IOptionsMonitor<RepositoriesConfig> GetMockConfig()
         {
-            if (logLevel == LogLevel.Error)
-                Error = formatter(state, exception);
+            var config = new RepositoriesConfig
+            {
+                ReposFolder = "-",
+                MergeUserName = "-",
+                MergeUserEmail = "-",
+                ReposInfo = new[]
+                {
+                    new RepositoryInfoConfig
+                    {
+                        Name = "-",
+                        Url = "-",
+                        LocalPath = "-",
+                        Username = "-",
+                        Password = "-"
+                    },
+                }
+            };
+            return Mock.Of<IOptionsMonitor<RepositoriesConfig>>(_ => _.CurrentValue == config);
+        }
+
+        private IConfiguration LoadTestConfiguration()
+        {
+            var path = Directory.GetCurrentDirectory().Substring(0, Directory.GetCurrentDirectory().IndexOf("bin\\"));
+            path += "../Analyzer.Git.Web.Api/";
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(path)
+                .AddJsonFile("appsettings.Development.json")
+                .Build();
+            return config;
         }
     }
 }

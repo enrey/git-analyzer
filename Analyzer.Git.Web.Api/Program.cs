@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace GitAnalyzer.Web.Api
+namespace Analyzer.Git.Web.Api
 {
     public class Program
     {

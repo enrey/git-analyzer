@@ -1,9 +1,9 @@
-﻿using GitAnalyzer.Application.Dto.Statistics;
+﻿using Analyzer.Git.Application.Dto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GitAnalyzer.Application.Services.Statistics
+namespace Analyzer.Git.Application.Services.Statistics
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев

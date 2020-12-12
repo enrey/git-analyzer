@@ -1,4 +1,4 @@
-﻿namespace GitAnalyzer.Application.Configuration
+﻿namespace Analyzer.Git.Application.Configuration
 {
     /// <summary>
     /// Конфигурация репозитория

@@ -1,9 +1,7 @@
 ﻿using Atlassian.Jira;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace JiraAnalyzer.Web.Api.Dto
+namespace Analyzer.Jira.Application.Dto
 {
     public class IssueAndLogs
     {

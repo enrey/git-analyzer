@@ -269,3 +269,6 @@ appsettings.Test.json
 Temp_Repositories
 
 !GitLabApiClient/Models/Releases
+Analyzer.Jira.Web.Api/appsettings.Production.json
+Analyzer.Git.Web.Api/appsettings.Production.json
+Analyzer.GitLab.Web.Api/appsettings.Production.json

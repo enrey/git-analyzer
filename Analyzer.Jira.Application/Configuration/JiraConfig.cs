@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace JiraAnalyzer.Web.Api
+﻿namespace Analyzer.Jira.Application.Configuration
 {
     /// <summary>
     /// Конфигурация Jira

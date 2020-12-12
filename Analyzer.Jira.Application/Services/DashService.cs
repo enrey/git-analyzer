@@ -1,12 +1,11 @@
-﻿using Atlassian.Jira;
-using JiraAnalyzer.Web.Api.Dto;
+﻿using Analyzer.Jira.Application.Dto;
+using Atlassian.Jira;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace JiraAnalyzer.Web.Api.Services
+namespace Analyzer.Jira.Application.Services
 {
-
     public class DashService
     {
         public IList<Info> GetDash(IList<IssueAndLogs> issues, List<JiraUser> users)
@@ -80,13 +79,13 @@ namespace JiraAnalyzer.Web.Api.Services
                 {
                     AssigneeCurrent = GetCurrentIssueAssignee(users, issue),
                     Assignee = inDevelopAssignee,
-                    AssigneeEmail = users.FirstOrDefault(o=>o.DisplayName == inDevelopAssignee)?.Email.ToLower(),
+                    AssigneeEmail = users.FirstOrDefault(o => o.DisplayName == inDevelopAssignee)?.Email.ToLower(),
                     Days = (DateTime.Now - inDevelopEntry.CreatedDate).Days,
                     DaysDate = inDevelopEntry.CreatedDate,
                     DaysBeforeTest = daysInWork,
-                    DaysBeforeTestDate = (inTestEntry != null) ? inTestEntry.CreatedDate : DateTime.MaxValue,
+                    DaysBeforeTestDate = inTestEntry != null ? inTestEntry.CreatedDate : DateTime.MaxValue,
                     Status = issue.Status.Name,
-                    OriginalEstimateHours = issue.TimeTrackingData.OriginalEstimateInSeconds.HasValue ? issue.TimeTrackingData.OriginalEstimateInSeconds.Value / 60 / 60: 0,
+                    OriginalEstimateHours = issue.TimeTrackingData.OriginalEstimateInSeconds.HasValue ? issue.TimeTrackingData.OriginalEstimateInSeconds.Value / 60 / 60 : 0,
                     Type = issue.Type.Name,
                     Number = issue.Key.Value,
                     Project = issue.Project,
@@ -148,7 +147,7 @@ namespace JiraAnalyzer.Web.Api.Services
                 inDevelopAssignee = prevAssigneeFound;
 
                 // если не нашли, идем вперед и ищем момент когда разработчик сменился на тестеровщика
-                if (prevAssigneeFound==null)
+                if (prevAssigneeFound == null)
                 {
                     string nextAssigneeFound = null;
                     var ind = featureLogStatuses.IndexOf(inDevelopEntry);

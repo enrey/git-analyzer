@@ -3,8 +3,6 @@ using System;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using GitAnalyzer.Web.Contracts.Statistics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 
-namespace GitAnalyzer.Web.Api
+namespace Analyzer.Git.Web.Api
 {
     public class Startup
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JiraAnalyzer.Web.Api.Dto
+namespace Analyzer.Jira.Application.Dto
 {
     public class Info
     {

@@ -1,13 +1,11 @@
-﻿using Analyzer.Git.Application.Dto.GitLab;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Analyzer.GitLab.Web.Api.Dto
+namespace Analyzer.Git.Application.Dto.GitLab
 {
     /// <summary>
-    /// Контракт данных о статистике мерджреквестов пользователя
+    /// DTO для данных о мердж реквестах пользователя GitLab
     /// </summary>
-    public class UserMergeRequestsStatisicsContract
+    public class UserMergeRequestsStatisicsDto
     {
         /// <summary>
         /// Email пользователя
@@ -19,10 +17,6 @@ namespace Analyzer.GitLab.Web.Api.Dto
         /// </summary>
         public string Username { get; set; }
 
-        public List<DateAndIdItem> OpenedDates { get; set; }
-
-        public List<DateAndIdItem> MergedDates { get; set; }
-
         /// <summary>
         /// Количество открытых пользователем реквестов
         /// </summary>
@@ -33,9 +27,13 @@ namespace Analyzer.GitLab.Web.Api.Dto
         /// </summary>
         public int MergedTotal { get; set; }
 
+        public List<DateAndIdItem> OpenedDates { get; set; }
+
+        public List<DateAndIdItem> MergedDates { get; set; }
+
         /// <summary>
-        /// Количество открытых пользователем реквестов
+        /// Репозиторий
         /// </summary>
-        public IList<UserMergeRequestsStatisicsItemContract> Items { get; set; }
+        public IList<UserMergeRequestsStatisicsItemDto> Items { get; set; }
     }
 }

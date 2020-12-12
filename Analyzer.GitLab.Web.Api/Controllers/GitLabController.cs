@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Analyzer.Git.Application.Dto;
+using Analyzer.Git.Application.Dto.GitLab;
+using Analyzer.Git.Application.Services.GitLab;
+using Analyzer.GitLab.Web.Api.Dto;
 using AutoMapper;
-using GitAnalyzer.Application.Dto.Statistics;
-using GitAnalyzer.Application.Services.GitLab;
-using GitAnalyzer.Web.Contracts.GitLab;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace GitAnalyzer.Web.GitLab.Api.Controllers
+namespace Analyzer.GitLab.Web.Api.Controllers
 {
     /// <summary>
     /// Контроллер для работы с данными из GitLab
@@ -18,7 +19,7 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
     [ApiController]
     public class GitLabController : ControllerBase
     {
-        private const int TIMEOUT_SECONDS = 60 * 60;
+        private const int TIMEOUT_SECONDS = 1;
 
         private readonly IGitLabService _gitLabService;
         private readonly IMapper _mapper;
@@ -58,6 +59,29 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
                 });
         }
 
+
+        /// <summary>
+        /// Получение статистики по мерджреквестам из GitLab'а
+        /// </summary>
+        /// <param name="startDate">Дата начала периода в формате YYYY-MM-DD</param>
+        /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
+        /// <returns></returns>
+        [HttpGet("comments/{startDate}/{endDate}")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
+        [ProducesResponseType(typeof(IEnumerable<CommentsStatisicsDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMergeRequestsComments(DateTime startDate, DateTime endDate)
+        {
+            return await _cache.GetOrCreateAsync("statisticComments" + startDate.ToShortDateString() + "/" + endDate.ToShortDateString(),
+                async cacheEntry =>
+                {
+                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+
+                    var dtos = await _gitLabService.GetMergeRequestsCommentsStatistics(startDate, endDate);
+
+                    return Ok(dtos);
+                });
+        }
+
         /// <summary>
         /// Получение пользователей GitLab'а
         /// </summary>
@@ -76,7 +100,6 @@ namespace GitAnalyzer.Web.GitLab.Api.Controllers
                     return Ok(dtos);
                 });
         }
-
 
         /// <summary>
         /// Возвращает последние коммиты репозиториев GitLab'а

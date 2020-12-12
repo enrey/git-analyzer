@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Analyzer.Git.Application\Analyzer.Git.Application.csproj" />
-    <ProjectReference Include="..\Analyzer.Application\Analyzer.Application.csproj" />
   </ItemGroup>
 
 </Project>

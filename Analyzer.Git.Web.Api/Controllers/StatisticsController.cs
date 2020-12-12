@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Web.Api.Dto;
 using AutoMapper;
-using GitAnalyzer.Application.Services.Statistics;
-using GitAnalyzer.Web.Contracts.Statistics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace GitAnalyzer.Web.Api.Controllers
+namespace Analyzer.Git.Web.Api.Controllers
 {
     /// <summary>
     /// Контроллер для раьоты со статистикой GIT репозиториев
