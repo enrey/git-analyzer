@@ -19,7 +19,7 @@ namespace Analyzer.GitLab.Web.Api.Controllers
     [ApiController]
     public class GitLabController : ControllerBase
     {
-        private const int TIMEOUT_SECONDS = 1;
+        private const int TIMEOUT_SECONDS = 60 * 60;
 
         private readonly IGitLabService _gitLabService;
         private readonly IMapper _mapper;

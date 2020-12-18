@@ -526,10 +526,11 @@ namespace Analyzer.Git.Application.Services.Statistics
                     Name = g.Key.Name,
                     Email = g.Key.Email,
                     Commits = g.Count(),
-                    Shas = g.SelectMany(o => o.Shas).ToList(),
+                    Shas = g.SelectMany(o => o.Shas).Distinct().ToList(),
                     Added = g.Sum(g => g.Added),
                     Deleted = g.Sum(g => g.Deleted),
                     Total = g.Sum(g => g.Total),
+                    CommitsChurnArray = g.Select(o => o.Total).ToList()
                 })
                 .OrderBy(r => r.Name)
             .ToList();

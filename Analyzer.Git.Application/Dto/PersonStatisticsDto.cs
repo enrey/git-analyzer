@@ -38,5 +38,7 @@ namespace Analyzer.Git.Application.Dto
         /// Всего
         /// </summary>
         public int Total { get; set; }
+
+        public List<int> CommitsChurnArray { get; set; }
     }
 }
