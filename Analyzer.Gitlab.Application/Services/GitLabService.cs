@@ -126,7 +126,7 @@ namespace Analyzer.Git.Application.Services.GitLab
             .ToList();
 
             var creationData = mergeRequests
-                .Where(mr => startDate <= mr.CreatedAt)
+                .Where(mr => mr.CreatedAt >= startDate && mr.CreatedAt <= endDate)
                 .GroupBy(mr => new { mr.AuthorId, mr.ProjectId })
                 .Select(gr => new
                 {
@@ -138,7 +138,7 @@ namespace Analyzer.Git.Application.Services.GitLab
                 .ToList();
 
             var mergeData = mergeRequests
-                .Where(mr => mr.MergedById.HasValue && mr.MergedAt != null && mr.MergedAt.Value <= endDate)
+                .Where(mr => mr.MergedById.HasValue && mr.MergedAt != null && mr.MergedAt.Value >= startDate && mr.MergedAt.Value <= endDate)
                 .GroupBy(mr => new { mr.MergedById, mr.ProjectId })
                 .Select(gr => new
                 {
