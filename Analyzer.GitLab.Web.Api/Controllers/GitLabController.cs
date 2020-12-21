@@ -118,5 +118,24 @@ namespace Analyzer.GitLab.Web.Api.Controllers
                 return Ok(commits);
             });
         }
+
+        /// <summary>
+        /// Возвращает список активных с начала указанной даты репозиториев 
+        /// <param name="sinceDate">Начало периода активности в формате YYYY-MM-DD</param>
+        /// </summary>
+        [HttpGet("gitlab-active-repositories/{sinceDate}")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryParameters>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActiveRepositories(DateTime sinceDate)
+        {
+            return await _cache.GetOrCreateAsync("active-gitlab-repos", async cacheEntry =>
+            {
+                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+
+                var commits = await _gitLabService.GetActiveRepositories(sinceDate);
+
+                return Ok(commits);
+            });
+        }
     }
 }

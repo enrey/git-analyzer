@@ -264,5 +264,16 @@ namespace Analyzer.Git.Application.Services.GitLab
 
             return result.OrderBy(r => r.RepositoryName).ToList();
         }
+
+        /// <summary>
+        /// Получить активные репозитории GitLab'а
+        /// </summary>
+        public Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate)
+        {
+            var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
+
+
+            throw new NotImplementedException();
+        }
     }
 }

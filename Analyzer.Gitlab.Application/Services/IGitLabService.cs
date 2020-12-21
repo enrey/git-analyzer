@@ -31,5 +31,10 @@ namespace Analyzer.Git.Application.Services.GitLab
         /// </summary>
         Task<IEnumerable<RepositoryLastCommitDto>> GetRepositoriesLastCommit();
 
+        /// <summary>
+        /// Получить активные репозитории GitLab'а
+        /// </summary>
+        Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate);
+
     }
 }
