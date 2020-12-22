@@ -287,6 +287,7 @@ namespace Analyzer.Git.Application.Services.GitLab
                 {
                     Name = GenerateRepoNameByUrl(rp.WebUrl),
                     WebUI = rp.WebUrl,
+                    RepoUrl = rp.HttpUrlToRepo,
                     RepoPath = GenerateLocalPathNameByUrl(rp.WebUrl)
                 });
 
