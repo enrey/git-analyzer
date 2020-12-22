@@ -47,6 +47,9 @@ namespace GitLabApiClient.Internal.Queries
 
             if (options.WithMergeRequestsEnabled)
                 Add("with_merge_requests_enabled", options.WithMergeRequestsEnabled);
+
+            if (options.LastActivityAfter != default)
+                Add("last_activity_after", options.LastActivityAfter.Date.ToString());
         }
 
         private static string GetProjectOrderQueryValue(ProjectsOrder order)

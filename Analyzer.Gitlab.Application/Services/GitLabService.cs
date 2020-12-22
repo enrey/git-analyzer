@@ -3,6 +3,8 @@ using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
 using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
+using GitLabApiClient.Models.Projects.Requests;
+using GitLabApiClient.Models.Projects.Responses;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -268,12 +270,58 @@ namespace Analyzer.Git.Application.Services.GitLab
         /// <summary>
         /// Получить активные репозитории GitLab'а
         /// </summary>
-        public Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate)
+        public async Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate)
         {
+            Action<ProjectQueryOptions> queryOptionsDelegate;
+
             var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
 
+            queryOptionsDelegate = options =>
+            {
+                options.LastActivityAfter = sinceDate;
+                options.Order = ProjectsOrder.LastActivityAt;
+            };
 
-            throw new NotImplementedException();
+            var projects = (await client.Projects.GetAsync(queryOptionsDelegate))
+                .Select(rp => new RepositoryParameters() 
+                {
+                    Name = GenerateRepoNameByUrl(rp.WebUrl),
+                    WebUI = rp.WebUrl,
+                    RepoPath = GenerateLocalPathNameByUrl(rp.WebUrl)
+                });
+
+            return new List<RepositoryParameters>(projects.OrderBy(r => r.WebUI));
+        }
+
+        /// <summary>
+        /// Сгенерировать имя репозитория
+        /// </summary>
+        /// <returns></returns>
+        private string GenerateRepoNameByUrl(string url)
+        {
+            var arr = url.Split("/");
+
+            if (arr.Length < 2)
+                return url;
+
+            if (arr[^2] == arr[^1])
+                return arr.Last();
+
+            return $"{arr[^2]}.{arr[^1]}";
+        }
+
+        /// <summary>
+        /// Сгенерировать имя репозитория
+        /// </summary>
+        /// <returns></returns>
+        private string GenerateLocalPathNameByUrl(string url)
+        {
+            var arr = url.Split("/");
+
+            if (arr.Length < 2)
+                return url;
+
+            return arr.Last();
         }
     }
 }

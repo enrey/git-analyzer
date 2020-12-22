@@ -1,3 +1,5 @@
+using System;
+
 namespace GitLabApiClient.Models.Projects.Requests
 {
     /// <summary>
@@ -71,5 +73,10 @@ namespace GitLabApiClient.Models.Projects.Requests
         /// Limit by enabled merge requests feature
         /// </summary>
         public bool WithMergeRequestsEnabled { get; set; }
+
+        /// <summary>
+        /// Activity since date
+        /// </summary>
+        public DateTime LastActivityAfter { get; set; }
     }
 }
