@@ -1,6 +1,7 @@
 ﻿using Analyzer.Git.Application.Configuration;
 using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
+using Analyzer.Gitlab.Application.Dto;
 using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
 using GitLabApiClient.Models.Projects.Requests;
@@ -270,7 +271,7 @@ namespace Analyzer.Git.Application.Services.GitLab
         /// <summary>
         /// Получить активные репозитории GitLab'а
         /// </summary>
-        public async Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate)
+        public async Task<IEnumerable<RepositoryInfoDto>> GetActiveRepositories(DateTime sinceDate)
         {
             Action<ProjectQueryOptions> queryOptionsDelegate;
 
@@ -283,15 +284,15 @@ namespace Analyzer.Git.Application.Services.GitLab
             };
 
             var projects = (await client.Projects.GetAsync(queryOptionsDelegate))
-                .Select(rp => new RepositoryParameters() 
+                .Select(rp => new RepositoryInfoDto() 
                 {
                     Name = GenerateRepoNameByUrl(rp.WebUrl),
                     WebUI = rp.WebUrl,
-                    RepoUrl = rp.HttpUrlToRepo,
-                    RepoPath = GenerateLocalPathNameByUrl(rp.WebUrl)
+                    Url = rp.HttpUrlToRepo,
+                    LocalPath = GenerateLocalPathNameByUrl(rp.WebUrl)
                 });
 
-            return new List<RepositoryParameters>(projects.OrderBy(r => r.WebUI));
+            return new List<RepositoryInfoDto>(projects.OrderBy(r => r.WebUI));
         }
 
         /// <summary>

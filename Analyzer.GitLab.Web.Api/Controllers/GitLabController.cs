@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
 using Analyzer.Git.Application.Services.GitLab;
+using Analyzer.Gitlab.Application.Dto;
 using Analyzer.GitLab.Web.Api.Dto;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -125,7 +126,7 @@ namespace Analyzer.GitLab.Web.Api.Controllers
         /// </summary>
         [HttpGet("gitlab-active-repositories/{sinceDate}")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
-        [ProducesResponseType(typeof(IEnumerable<RepositoryParameters>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryInfoDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetActiveRepositories(DateTime sinceDate)
         {
             return await _cache.GetOrCreateAsync("active-gitlab-repos", async cacheEntry =>

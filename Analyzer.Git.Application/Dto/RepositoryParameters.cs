@@ -12,10 +12,8 @@
 
         public string WebUI { get; set; }
 
-        public string RepoUrl { get; set; }
-
         /// <summary>
-        /// Полный путь к репозиторию
+        /// Путь к репозиторию
         /// </summary>
         public string RepoPath { get; set; }
     }

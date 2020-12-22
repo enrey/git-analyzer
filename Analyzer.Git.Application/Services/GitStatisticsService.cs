@@ -22,6 +22,7 @@ namespace Analyzer.Git.Application.Services.Statistics
         private readonly StatisticsConfig _statisticsConfig;
         private readonly RepositoriesConfig _repositoriesConfig;
         private readonly WorkEstimateConfig _workEstimateConfig;
+        private readonly IGitlabServiceClient _gitlabServiceClient;
 
         private readonly object _locker = new object();
 
@@ -32,13 +33,15 @@ namespace Analyzer.Git.Application.Services.Statistics
             ILogger<GitStatisticsService> logger,
             IOptionsMonitor<StatisticsConfig> statisticsConfigMonitor,
             IOptionsMonitor<RepositoriesConfig> repositoriesConfig,
-            IOptionsMonitor<WorkEstimateConfig> workEstimateConfig
+            IOptionsMonitor<WorkEstimateConfig> workEstimateConfig,
+            IGitlabServiceClient gitlabServiceClient
             )
         {
             _logger = logger;
             _statisticsConfig = statisticsConfigMonitor.CurrentValue;
             _repositoriesConfig = repositoriesConfig.CurrentValue;
             _workEstimateConfig = workEstimateConfig.CurrentValue;
+            _gitlabServiceClient = gitlabServiceClient;
         }
 
         /// <summary>
@@ -147,7 +150,9 @@ namespace Analyzer.Git.Application.Services.Statistics
                 Password = _repositoriesConfig.GitlabAuthToken
             };
 
-            var reposInfo = _repositoriesConfig.ReposInfo
+            var repos = await GetAllRepositories(defaultCreds);
+
+            var reposInfo = repos
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
@@ -556,6 +561,22 @@ namespace Analyzer.Git.Application.Services.Statistics
                     RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}"
                 })
                 .ToList();
+        }
+
+        /// <summary>
+        /// Получить все репозитории из конфигов и из API
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IEnumerable<RepositoryInfoConfig>> GetAllRepositories(UsernamePasswordCredentials defaultCreds)
+        {
+            var allRepositories = new List<RepositoryInfoConfig>();
+            allRepositories.AddRange(await _gitlabServiceClient.GetAllReposFromApi(DateTime.Now.AddMonths(-1)));
+            var apiReposUrls = allRepositories.Select(c => c.Url);
+
+            allRepositories.AddRange(_repositoriesConfig.ReposInfo
+                .Where(r => !apiReposUrls.Contains(r.Url)));
+
+            return allRepositories;
         }
     }
 }

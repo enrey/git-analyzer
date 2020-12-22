@@ -1,5 +1,6 @@
 ﻿using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
+using Analyzer.Gitlab.Application.Dto;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace Analyzer.Git.Application.Services.GitLab
         /// <summary>
         /// Получить активные репозитории GitLab'а
         /// </summary>
-        Task<IEnumerable<RepositoryParameters>> GetActiveRepositories(DateTime sinceDate);
+        Task<IEnumerable<RepositoryInfoDto>> GetActiveRepositories(DateTime sinceDate);
 
     }
 }

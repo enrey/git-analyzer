@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using Analyzer.Git.Application.Services;
 
 namespace Analyzer.Git.IntegrationTests
 {
@@ -26,8 +27,9 @@ namespace Analyzer.Git.IntegrationTests
             var repoConfig = builder.GetService<IOptionsMonitor<RepositoriesConfig>>();
             var statConfig = builder.GetService<IOptionsMonitor<StatisticsConfig>>();
             var estConfig = builder.GetService<IOptionsMonitor<WorkEstimateConfig>>();
+            var _gitlabServiceClient = builder.GetService<IGitlabServiceClient>();
 
-            _service = new GitStatisticsService(_loggerMock, statConfig, repoConfig, estConfig);
+            _service = new GitStatisticsService(_loggerMock, statConfig, repoConfig, estConfig, _gitlabServiceClient);
         }
 
         [Test]
