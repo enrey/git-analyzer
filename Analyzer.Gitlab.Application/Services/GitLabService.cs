@@ -307,7 +307,7 @@ namespace Analyzer.Git.Application.Services.GitLab
             if (arr[^2] == arr[^1])
                 return arr.Last();
 
-            return $"{arr[^2]}.{arr[^1]}";
+            return $"{arr[^2]}_{arr[^1]}";
         }
 
         /// <summary>
