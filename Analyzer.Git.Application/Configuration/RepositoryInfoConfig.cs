@@ -1,14 +1,12 @@
-﻿namespace Analyzer.Git.Application.Configuration
+﻿using System.Linq;
+
+namespace Analyzer.Git.Application.Configuration
 {
     /// <summary>
     /// Конфигурация репозитория
     /// </summary>
     public class RepositoryInfoConfig
     {
-        /// <summary>
-        /// Имя репозитория
-        /// </summary>
-        public string Name { get; set; }
 
         /// <summary>
         /// Url удаленного репозитория 
@@ -19,6 +17,14 @@
         /// UI для фронта
         /// </summary>
         public string WebUI { get; set; }
+
+        /// <summary>
+        /// Имя репозитория
+        /// </summary>
+        public string Name
+        {
+            get => GenerateRepoNameByWebUI();
+        }
 
         /// <summary>
         /// Локальная папка для репозитория
@@ -34,5 +40,18 @@
         /// Пароль
         /// </summary>
         public string Password { get; set; }
+
+        private string GenerateRepoNameByWebUI()
+        {
+            var arr = WebUI.Split("/");
+
+            if (arr.Length < 2)
+                return WebUI;
+
+            if (arr[^2] == arr[^1])
+                return arr.Last();
+
+            return $"{arr[^2]}_{arr[^1]}";
+        }
     }
 }

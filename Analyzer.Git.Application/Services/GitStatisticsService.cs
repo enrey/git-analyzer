@@ -53,8 +53,9 @@ namespace Analyzer.Git.Application.Services.Statistics
         public async Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             var dates = GetDates(startDate, endDate);
+            var allRepos = await GetAllRepositoriesParameters();
 
-            var validRepos = GetAllRepositoriesParameters()
+            var validRepos = allRepos
                 .Where(ri => Repository.IsValid(ri.RepoPath));
 
             if (!validRepos.Any())
@@ -91,7 +92,8 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
         {
-            var repos = _repositoriesConfig.ReposInfo
+            var allRepos = await GetAllRepositories();
+            var repos = allRepos
                 .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}"))
                 .Select(rp => new
                 {
@@ -150,8 +152,7 @@ namespace Analyzer.Git.Application.Services.Statistics
                 Password = _repositoriesConfig.GitlabAuthToken
             };
 
-            var repos = await GetAllRepositories(defaultCreds);
-
+            var repos = await GetAllRepositories();
             var reposInfo = repos
                 .Select(info => new
                 {
@@ -202,7 +203,8 @@ namespace Analyzer.Git.Application.Services.Statistics
                 Password = _repositoriesConfig.GitlabAuthToken
             };
 
-            var repo = _repositoriesConfig.ReposInfo
+            var allRepos = await GetAllRepositories();
+            var repo = allRepos
                 .Where(rp => rp.Url == HttpUtility.UrlDecode(repoPath))
                 .Select(rp => new
                 {
@@ -249,8 +251,8 @@ namespace Analyzer.Git.Application.Services.Statistics
         public async Task<IEnumerable<RepositoryWorkEstimateDto>> GetWorkSessionsEstimate(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             var dates = GetDates(startDate, endDate);
-
-            var validRepos = GetAllRepositoriesParameters()
+            var allRepos = await GetAllRepositoriesParameters();
+            var validRepos = allRepos
                 .Where(ri => Repository.IsValid(ri.RepoPath))
                 .ToList();
 
@@ -551,9 +553,10 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// Сформировать параметры репозиториев из конфигурации
         /// </summary>
         /// <returns></returns>
-        private IEnumerable<RepositoryParameters> GetAllRepositoriesParameters()
+        private async Task<IEnumerable<RepositoryParameters>> GetAllRepositoriesParameters()
         {
-            return _repositoriesConfig.ReposInfo
+            var allRepositories = await GetAllRepositories();
+            return allRepositories
                 .Select(ri => new RepositoryParameters
                 {
                     Name = ri.Name,
@@ -567,7 +570,7 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// Получить все репозитории из конфигов и из API
         /// </summary>
         /// <returns></returns>
-        private async Task<IEnumerable<RepositoryInfoConfig>> GetAllRepositories(UsernamePasswordCredentials defaultCreds)
+        private async Task<IEnumerable<RepositoryInfoConfig>> GetAllRepositories()
         {
             var allRepositories = new List<RepositoryInfoConfig>();
             allRepositories.AddRange(await _gitlabServiceClient.GetAllReposFromApi(DateTime.Now.AddMonths(-1)));
