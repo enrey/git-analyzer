@@ -94,12 +94,12 @@ namespace Analyzer.Git.Application.Services.Statistics
         {
             var allRepos = await GetAllRepositories();
             var repos = allRepos
-                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}"))
+                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{GenerateLocalPathByWebUI(rp.WebUI)}"))
                 .Select(rp => new
                 {
-                    rp.Name,
+                    Name = GenerateRepoNameByWebUI(rp.WebUI),
                     rp.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateLocalPathByWebUI(rp.WebUI)}",
                 })
                 .ToList();
 
@@ -157,7 +157,7 @@ namespace Analyzer.Git.Application.Services.Statistics
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{info.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateLocalPathByWebUI(info.WebUI)}",
                     Credentials = defaultCreds
                 }).ToList();
 
@@ -208,9 +208,9 @@ namespace Analyzer.Git.Application.Services.Statistics
                 .Where(rp => rp.Url == HttpUtility.UrlDecode(repoPath))
                 .Select(rp => new
                 {
-                    rp.Name,
+                    Name = GenerateRepoNameByWebUI(rp.WebUI),
                     RepoUrl = rp.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateLocalPathByWebUI(rp.WebUI)}",
                     Credentials = defaultCreds
                 })
                 .First();
@@ -559,9 +559,9 @@ namespace Analyzer.Git.Application.Services.Statistics
             return allRepositories
                 .Select(ri => new RepositoryParameters
                 {
-                    Name = ri.Name,
+                    Name = GenerateRepoNameByWebUI(ri.WebUI),
                     WebUI = ri.WebUI,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}"
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateLocalPathByWebUI(ri.WebUI)}"
                 })
                 .ToList();
         }
@@ -579,12 +579,13 @@ namespace Analyzer.Git.Application.Services.Statistics
             allRepositories.AddRange(_repositoriesConfig.ReposInfo
                 .Where(r => !apiReposUrls.Contains(r.Url)));
 
-            allRepositories.ForEach(r => 
-            r.Name = GenerateRepoNameByWebUI(r.WebUI));
-
             return allRepositories;
         }
 
+        /// <summary>
+        /// Сгенерировать имя репозитория
+        /// </summary>
+        /// <returns></returns>
         private string GenerateRepoNameByWebUI(string url)
         {
             var arr = url.Split("/");
@@ -596,6 +597,20 @@ namespace Analyzer.Git.Application.Services.Statistics
                 return arr.Last();
 
             return $"{arr[^2]}_{arr[^1]}";
+        }
+
+        /// <summary>
+        /// Сгенерировать путь репозитория
+        /// </summary>
+        /// <returns></returns>
+        private string GenerateLocalPathByWebUI(string url)
+        {
+            var arr = url.Split("/");
+
+            if (arr.Length < 2)
+                return url;
+
+            return arr.Last();
         }
     }
 }

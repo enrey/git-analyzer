@@ -10,7 +10,6 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Analyzer.Git.Application.Services;
-using Analyzer.Git.IntegrationTests.TestServices;
 using System.Collections.Generic;
 
 namespace Analyzer.Git.IntegrationTests
@@ -81,8 +80,6 @@ namespace Analyzer.Git.IntegrationTests
             services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
-            services.Configure<LocalServicesConfig>(configuration.GetSection("LocalServices"));
-            services.AddTransient<IGitlabServiceClient, GitlabServiceClientTest>();
             var builder = services.BuildServiceProvider();
 
             return builder;
@@ -99,11 +96,7 @@ namespace Analyzer.Git.IntegrationTests
                 {
                     new RepositoryInfoConfig
                     {
-                        Name = "-",
-                        Url = "-",
-                        LocalPath = "-",
-                        Username = "-",
-                        Password = "-"
+                        Url = "-"
                     },
                 }
             };
@@ -131,8 +124,7 @@ namespace Analyzer.Git.IntegrationTests
                     new RepositoryInfoConfig()
                     {
                         Url = "https://git.it2g.ru/apk_ums/apk_ums.git",
-                        WebUI = "https://git.it2g.ru/apk_ums/apk_ums",
-                        LocalPath = "apk_ums"
+                        WebUI = "https://git.it2g.ru/apk_ums/apk_ums"
                     }
                 }));
 

@@ -11,10 +11,5 @@
         /// UI для фронта
         /// </summary>
         public string WebUI { get; set; }
-
-        /// <summary>
-        /// Локальная папка для репозитория
-        /// </summary>
-        public string LocalPath { get; set; }
     }
 }

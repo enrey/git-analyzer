@@ -287,25 +287,10 @@ namespace Analyzer.Git.Application.Services.GitLab
                 .Select(rp => new RepositoryInfoDto() 
                 {
                     WebUI = rp.WebUrl,
-                    Url = rp.HttpUrlToRepo,
-                    LocalPath = GenerateLocalPathNameByUrl(rp.WebUrl)
+                    Url = rp.HttpUrlToRepo
                 });
 
             return new List<RepositoryInfoDto>(projects.OrderBy(r => r.WebUI));
-        }
-
-        /// <summary>
-        /// Сгенерировать имя репозитория
-        /// </summary>
-        /// <returns></returns>
-        private string GenerateLocalPathNameByUrl(string url)
-        {
-            var arr = url.Split("/");
-
-            if (arr.Length < 2)
-                return url;
-
-            return arr.Last();
         }
     }
 }
