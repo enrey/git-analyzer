@@ -31,7 +31,7 @@ namespace Analyzer.Git.Application.Services
             var response = await _httpClient.GetAsync(_config.Gitlab.ActiveRepositories.Replace("sincedate", lastActivityAfter.Date.Date.ToString("yyyy-MM-dd")));
             var jsonString = await response.Content.ReadAsStringAsync();
 
-            if(!string.IsNullOrEmpty(jsonString))
+            if(response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonString))
                 configs.AddRange(JsonConvert.DeserializeObject<List<RepositoryInfoConfig>>(jsonString));
 
             return configs;

@@ -579,7 +579,23 @@ namespace Analyzer.Git.Application.Services.Statistics
             allRepositories.AddRange(_repositoriesConfig.ReposInfo
                 .Where(r => !apiReposUrls.Contains(r.Url)));
 
+            allRepositories.ForEach(r => 
+            r.Name = GenerateRepoNameByWebUI(r.WebUI));
+
             return allRepositories;
+        }
+
+        private string GenerateRepoNameByWebUI(string url)
+        {
+            var arr = url.Split("/");
+
+            if (arr.Length < 2)
+                return url;
+
+            if (arr[^2] == arr[^1])
+                return arr.Last();
+
+            return $"{arr[^2]}_{arr[^1]}";
         }
     }
 }

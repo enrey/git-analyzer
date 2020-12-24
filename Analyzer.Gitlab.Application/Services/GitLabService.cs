@@ -286,30 +286,12 @@ namespace Analyzer.Git.Application.Services.GitLab
             var projects = (await client.Projects.GetAsync(queryOptionsDelegate))
                 .Select(rp => new RepositoryInfoDto() 
                 {
-                    Name = GenerateRepoNameByUrl(rp.WebUrl),
                     WebUI = rp.WebUrl,
                     Url = rp.HttpUrlToRepo,
                     LocalPath = GenerateLocalPathNameByUrl(rp.WebUrl)
                 });
 
             return new List<RepositoryInfoDto>(projects.OrderBy(r => r.WebUI));
-        }
-
-        /// <summary>
-        /// Сгенерировать имя репозитория
-        /// </summary>
-        /// <returns></returns>
-        private string GenerateRepoNameByUrl(string url)
-        {
-            var arr = url.Split("/");
-
-            if (arr.Length < 2)
-                return url;
-
-            if (arr[^2] == arr[^1])
-                return arr.Last();
-
-            return $"{arr[^2]}_{arr[^1]}";
         }
 
         /// <summary>
