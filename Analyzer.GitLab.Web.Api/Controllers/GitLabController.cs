@@ -133,9 +133,9 @@ namespace Analyzer.GitLab.Web.Api.Controllers
             {
                 cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
 
-                var commits = await _gitLabService.GetActiveRepositories(sinceDate);
+                var repositories = await _gitLabService.GetActiveRepositories(sinceDate);
 
-                return Ok(commits);
+                return Ok(repositories);
             });
         }
     }
