@@ -66,7 +66,7 @@ namespace Analyzer.Gitlab.IntegrationTests
             var service = new GitLabService(gitlabConfig);
 
             // Act
-            var result = await service.GetActiveRepositories(DateTime.Now.AddMonths(-1));
+            var result = await service.GetActiveRepositories(sinceDate);
 
             // Assert
             Assert.IsTrue(result.Count() > 0);
