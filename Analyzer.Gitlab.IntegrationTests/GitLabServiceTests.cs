@@ -56,6 +56,22 @@ namespace Analyzer.Gitlab.IntegrationTests
             Assert.IsTrue(result.Count() > 0);
         }
 
+        [Test]
+        public async Task GetActiveRepositories_Success()
+        {
+            // Arrange
+            var sinceDate = DateTime.Now.AddMonths(-1);
+
+            var gitlabConfig = GetConfig();
+            var service = new GitLabService(gitlabConfig);
+
+            // Act
+            var result = await service.GetActiveRepositories(DateTime.Now.AddMonths(-1));
+
+            // Assert
+            Assert.IsTrue(result.Count() > 0);
+        }
+
         private IOptionsMonitor<GitLabConfig> GetConfig()
         {
             var configuration = LoadTestConfiguration();
