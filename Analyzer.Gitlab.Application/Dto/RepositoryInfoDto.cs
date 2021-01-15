@@ -1,11 +1,6 @@
-﻿using System.Linq;
-
-namespace Analyzer.Git.Application.Configuration
+﻿namespace Analyzer.Gitlab.Application.Dto
 {
-    /// <summary>
-    /// Конфигурация репозитория
-    /// </summary>
-    public class RepositoryInfoConfig
+    public class RepositoryInfoDto
     {
         /// <summary>
         /// Url удаленного репозитория 

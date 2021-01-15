@@ -22,6 +22,7 @@ namespace Analyzer.Git.Application.Services.Statistics
         private readonly StatisticsConfig _statisticsConfig;
         private readonly RepositoriesConfig _repositoriesConfig;
         private readonly WorkEstimateConfig _workEstimateConfig;
+        private readonly IGitlabServiceClient _gitlabServiceClient;
 
         private readonly object _locker = new object();
 
@@ -32,13 +33,15 @@ namespace Analyzer.Git.Application.Services.Statistics
             ILogger<GitStatisticsService> logger,
             IOptionsMonitor<StatisticsConfig> statisticsConfigMonitor,
             IOptionsMonitor<RepositoriesConfig> repositoriesConfig,
-            IOptionsMonitor<WorkEstimateConfig> workEstimateConfig
+            IOptionsMonitor<WorkEstimateConfig> workEstimateConfig,
+            IGitlabServiceClient gitlabServiceClient
             )
         {
             _logger = logger;
             _statisticsConfig = statisticsConfigMonitor.CurrentValue;
             _repositoriesConfig = repositoriesConfig.CurrentValue;
             _workEstimateConfig = workEstimateConfig.CurrentValue;
+            _gitlabServiceClient = gitlabServiceClient;
         }
 
         /// <summary>
@@ -50,8 +53,9 @@ namespace Analyzer.Git.Application.Services.Statistics
         public async Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             var dates = GetDates(startDate, endDate);
+            var allRepos = await GetAllRepositoriesParameters();
 
-            var validRepos = GetAllRepositoriesParameters()
+            var validRepos = allRepos
                 .Where(ri => Repository.IsValid(ri.RepoPath));
 
             if (!validRepos.Any())
@@ -88,13 +92,14 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// <returns></returns>
         public async Task<IEnumerable<RepositoryLastCommitDto>> GetAllRepositoriesLastCommitAsync()
         {
-            var repos = _repositoriesConfig.ReposInfo
-                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}"))
+            var allRepos = await GetAllRepositories();
+            var repos = allRepos
+                .Where(rp => Repository.IsValid(@$"{_repositoriesConfig.ReposFolder}/{GenerateRepoNameByWebUI(rp.WebUI)}"))
                 .Select(rp => new
                 {
-                    rp.Name,
+                    Name = GenerateRepoNameByWebUI(rp.WebUI),
                     rp.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateRepoNameByWebUI(rp.WebUI)}",
                 })
                 .ToList();
 
@@ -147,11 +152,12 @@ namespace Analyzer.Git.Application.Services.Statistics
                 Password = _repositoriesConfig.GitlabAuthToken
             };
 
-            var reposInfo = _repositoriesConfig.ReposInfo
+            var repos = await GetAllRepositories();
+            var reposInfo = repos
                 .Select(info => new
                 {
                     RepoUrl = info.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{info.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateRepoNameByWebUI(info.WebUI)}",
                     Credentials = defaultCreds
                 }).ToList();
 
@@ -197,13 +203,14 @@ namespace Analyzer.Git.Application.Services.Statistics
                 Password = _repositoriesConfig.GitlabAuthToken
             };
 
-            var repo = _repositoriesConfig.ReposInfo
+            var allRepos = await GetAllRepositories();
+            var repo = allRepos
                 .Where(rp => rp.Url == HttpUtility.UrlDecode(repoPath))
                 .Select(rp => new
                 {
-                    rp.Name,
+                    Name = GenerateRepoNameByWebUI(rp.WebUI),
                     RepoUrl = rp.Url,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{rp.LocalPath}",
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateRepoNameByWebUI(rp.WebUI)}",
                     Credentials = defaultCreds
                 })
                 .First();
@@ -244,8 +251,8 @@ namespace Analyzer.Git.Application.Services.Statistics
         public async Task<IEnumerable<RepositoryWorkEstimateDto>> GetWorkSessionsEstimate(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             var dates = GetDates(startDate, endDate);
-
-            var validRepos = GetAllRepositoriesParameters()
+            var allRepos = await GetAllRepositoriesParameters();
+            var validRepos = allRepos
                 .Where(ri => Repository.IsValid(ri.RepoPath))
                 .ToList();
 
@@ -546,16 +553,47 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// Сформировать параметры репозиториев из конфигурации
         /// </summary>
         /// <returns></returns>
-        private IEnumerable<RepositoryParameters> GetAllRepositoriesParameters()
+        private async Task<IEnumerable<RepositoryParameters>> GetAllRepositoriesParameters()
         {
-            return _repositoriesConfig.ReposInfo
+            var allRepositories = await GetAllRepositories();
+            return allRepositories
                 .Select(ri => new RepositoryParameters
                 {
-                    Name = ri.Name,
+                    Name = GenerateRepoNameByWebUI(ri.WebUI),
                     WebUI = ri.WebUI,
-                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{ri.LocalPath}"
+                    RepoPath = @$"{_repositoriesConfig.ReposFolder}/{GenerateRepoNameByWebUI(ri.WebUI)}"
                 })
                 .ToList();
+        }
+
+        /// <summary>
+        /// Получить все репозитории из конфигов и из API
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IEnumerable<RepositoryInfoConfig>> GetAllRepositories()
+        {
+            var allRepositories = new List<RepositoryInfoConfig>();
+            allRepositories.AddRange(await _gitlabServiceClient.GetAllReposFromApi(DateTime.Now.AddMonths(-1)));
+            var apiReposUrls = allRepositories.Select(c => c.Url);
+
+            allRepositories.AddRange(_repositoriesConfig.ReposInfo
+                .Where(r => !apiReposUrls.Contains(r.Url)));
+
+            return allRepositories;
+        }
+
+        /// <summary>
+        /// Сгенерировать имя репозитория
+        /// </summary>
+        /// <returns></returns>
+        private string GenerateRepoNameByWebUI(string url)
+        {
+            var arr = url.Split("/");
+
+            if (arr.Length < 2)
+                return url;
+
+            return $"{arr[^2]}_{arr[^1]}";
         }
     }
 }

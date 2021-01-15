@@ -13,7 +13,7 @@
         public string WebUI { get; set; }
 
         /// <summary>
-        /// Полный путь к репозиторию
+        /// Путь к репозиторию
         /// </summary>
         public string RepoPath { get; set; }
     }

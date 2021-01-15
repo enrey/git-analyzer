@@ -5,6 +5,7 @@ using Analyzer.Git.Application.Services.Statistics;
 using Analyzer.Git.Application.Configuration;
 using Analyzer.Git.Web.Api.Hosted;
 using Analyzer.Git.Web.Api.Mapper;
+using Analyzer.Git.Application.Services;
 
 namespace Analyzer.Git.Web.Api
 {
@@ -12,12 +13,14 @@ namespace Analyzer.Git.Web.Api
     {
         public static void RegisterServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddTransient<IGitlabServiceClient, GitlabServiceClient>();
             services.AddTransient<IGitStatisticsService, GitStatisticsService>();
 
             services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
             services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
             services.Configure<GitLabConfig>(configuration.GetSection("GitLab"));
+            services.Configure<LocalServicesConfig>(configuration.GetSection("LocalServices"));
 
             services.AddAutoMapper(typeof(StatisticsMapperProfile));
             services.AddHostedService<UpdateRepositoriesHostedService>();

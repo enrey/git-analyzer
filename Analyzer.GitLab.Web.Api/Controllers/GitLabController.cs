@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
 using Analyzer.Git.Application.Services.GitLab;
+using Analyzer.Gitlab.Application.Dto;
 using Analyzer.GitLab.Web.Api.Dto;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -116,6 +117,25 @@ namespace Analyzer.GitLab.Web.Api.Controllers
                 var commits = await _gitLabService.GetRepositoriesLastCommit();
 
                 return Ok(commits);
+            });
+        }
+
+        /// <summary>
+        /// Возвращает список активных с начала указанной даты репозиториев 
+        /// <param name="sinceDate">Начало периода активности в формате YYYY-MM-DD</param>
+        /// </summary>
+        [HttpGet("gitlab-active-repositories/{sinceDate}")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
+        [ProducesResponseType(typeof(IEnumerable<RepositoryInfoDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActiveRepositories(DateTime sinceDate)
+        {
+            return await _cache.GetOrCreateAsync("active-gitlab-repos", async cacheEntry =>
+            {
+                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+
+                var repositories = await _gitLabService.GetActiveRepositories(sinceDate);
+
+                return Ok(repositories);
             });
         }
     }

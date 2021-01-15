@@ -1,8 +1,11 @@
 ﻿using Analyzer.Git.Application.Configuration;
 using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Dto.GitLab;
+using Analyzer.Gitlab.Application.Dto;
 using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
+using GitLabApiClient.Models.Projects.Requests;
+using GitLabApiClient.Models.Projects.Responses;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -263,6 +266,31 @@ namespace Analyzer.Git.Application.Services.GitLab
             }));
 
             return result.OrderBy(r => r.RepositoryName).ToList();
+        }
+
+        /// <summary>
+        /// Получить активные репозитории GitLab'а
+        /// </summary>
+        public async Task<IEnumerable<RepositoryInfoDto>> GetActiveRepositories(DateTime sinceDate)
+        {
+            Action<ProjectQueryOptions> queryOptionsDelegate;
+
+            var client = new GitLabClient(_gitLabConfig.ApiUrl, _gitLabConfig.PrivateToken);
+
+            queryOptionsDelegate = options =>
+            {
+                options.LastActivityAfter = sinceDate;
+                options.Order = ProjectsOrder.LastActivityAt;
+            };
+
+            var projects = (await client.Projects.GetAsync(queryOptionsDelegate))
+                .Select(rp => new RepositoryInfoDto() 
+                {
+                    WebUI = rp.WebUrl,
+                    Url = rp.HttpUrlToRepo
+                });
+
+            return new List<RepositoryInfoDto>(projects.OrderBy(r => r.WebUI));
         }
     }
 }

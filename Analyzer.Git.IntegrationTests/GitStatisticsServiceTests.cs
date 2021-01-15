@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using Analyzer.Git.Application.Services;
+using System.Collections.Generic;
 
 namespace Analyzer.Git.IntegrationTests
 {
@@ -26,8 +28,9 @@ namespace Analyzer.Git.IntegrationTests
             var repoConfig = builder.GetService<IOptionsMonitor<RepositoriesConfig>>();
             var statConfig = builder.GetService<IOptionsMonitor<StatisticsConfig>>();
             var estConfig = builder.GetService<IOptionsMonitor<WorkEstimateConfig>>();
+            var _gitlabServiceClient = MockGitlabSrvice();
 
-            _service = new GitStatisticsService(_loggerMock, statConfig, repoConfig, estConfig);
+            _service = new GitStatisticsService(_loggerMock, statConfig, repoConfig, estConfig, _gitlabServiceClient);
         }
 
         [Test]
@@ -76,6 +79,7 @@ namespace Analyzer.Git.IntegrationTests
             services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
             services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
+            services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
             var builder = services.BuildServiceProvider();
 
             return builder;
@@ -92,11 +96,7 @@ namespace Analyzer.Git.IntegrationTests
                 {
                     new RepositoryInfoConfig
                     {
-                        Name = "-",
-                        Url = "-",
-                        LocalPath = "-",
-                        Username = "-",
-                        Password = "-"
+                        Url = "-"
                     },
                 }
             };
@@ -113,6 +113,22 @@ namespace Analyzer.Git.IntegrationTests
                 .AddJsonFile("appsettings.Development.json")
                 .Build();
             return config;
+        }
+
+        private IGitlabServiceClient MockGitlabSrvice()
+        {
+            Mock<IGitlabServiceClient> _gitlabServiceClient = new Mock<IGitlabServiceClient>();
+            _gitlabServiceClient.Setup(gr => gr.GetAllReposFromApi(DateTime.Now.AddMonths(-1)))
+                .Returns(Task.FromResult<IEnumerable<RepositoryInfoConfig>>(new List<RepositoryInfoConfig>()
+                {
+                    new RepositoryInfoConfig()
+                    {
+                        Url = "https://git.it2g.ru/apk_ums/apk_ums.git",
+                        WebUI = "https://git.it2g.ru/apk_ums/apk_ums"
+                    }
+                }));
+
+            return _gitlabServiceClient.Object;
         }
     }
 }
