@@ -28,7 +28,7 @@ namespace Analyzer.Git.Application.Services
             var configs = new List<RepositoryInfoConfig>();
 
             var _httpClient = new HttpClient { BaseAddress = new Uri(_config.Gitlab.BaseUrl) };
-            var response = await _httpClient.GetAsync(_config.Gitlab.ActiveRepositories.Replace("sincedate", lastActivityAfter.Date.Date.ToString("yyyy-MM-dd")));
+            var response = await _httpClient.GetAsync(_config.Gitlab.ActiveRepositories.Replace("sincedate", lastActivityAfter.Date.ToString("yyyy-MM-dd")));
             var jsonString = await response.Content.ReadAsStringAsync();
 
             if(response.IsSuccessStatusCode && !string.IsNullOrEmpty(jsonString))
