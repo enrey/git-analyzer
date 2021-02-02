@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Nest;
 using System;
 using System.Collections.Generic;
 
@@ -15,66 +16,59 @@ namespace JiraAnalyzer.Web.Api.Controllers
     [Route("api/dash")]
     public class JiraController : Controller
     {
-        private const int TIMEOUT_SECONDS = 60 * 60;
-
         private readonly ILogger<JiraController> _logger;
-        private readonly IMemoryCache _cache;
         private readonly JiraService _jiraService;
+        private readonly JiraElasticService _jiraElasticService;
 
         /// <summary> Информация по Jira </summary>
-        public JiraController(ILogger<JiraController> logger, IMemoryCache cache, JiraService jiraService)
+        public JiraController(ILogger<JiraController> logger, JiraService jiraService, JiraElasticService jiraElasticService)
         {
             _logger = logger;
-            _cache = cache;
             _jiraService = jiraService;
+            _jiraElasticService = jiraElasticService;
         }
 
         [HttpGet]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<Info>), StatusCodes.Status200OK)]
         public IActionResult Get(int? forDays = 20)
         {
-            return _cache.GetOrCreate("dash" + forDays,
-                cacheEntry => {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var days = $"-{forDays}d";
+            _logger.LogInformation($"Querying for {days}");
 
-                    // var days = "-20d";
-                    var days = $"-{forDays}d"; 
-                    _logger.LogInformation($"Querying for {days}");
+            var collection = _jiraService.GetJiraInfo(days);
 
-                    var collection = _jiraService.GetJiraInfo(days);
-
-                    _logger.LogInformation("Ended");
-                    return Json(collection);
-                });        
- 
+            _logger.LogInformation("Ended");
+            return Json(collection);
         }
 
-        [HttpGet("{startDate}/{endDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
+        [HttpGet("jira")]
         [ProducesResponseType(typeof(IEnumerable<Info>), StatusCodes.Status200OK)]
         public IActionResult Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            return _cache.GetOrCreate("dash" + startDate.DateTime.ToShortDateString() + "/" + endDate.DateTime.ToShortDateString(),
-                cacheEntry => {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            _logger.LogInformation($"Querying for {startDate.DateTime.ToShortDateString()} - {endDate.DateTime.ToShortDateString()}");
 
-                    var collection = _jiraService.GetJiraInfo(startDate, endDate);
+            var collection = _jiraElasticService.GetJiraInfo(startDate, endDate);
 
-                    _logger.LogInformation("Ended");
-                    return Json(collection);
-                });
-
+            _logger.LogInformation("Ended");
+            return Json(collection);
         }
 
         [HttpGet("users")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<JiraUser>), StatusCodes.Status200OK)]
         public IActionResult GetUsers()
         {
             var collection = _jiraService.GetUsers();
 
             return Json(collection);
+        }
+
+        [HttpPost("update-elastic")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        public IActionResult Update()
+        {
+            _jiraElasticService.UpdateMonth();
+
+            return Json("ok");
         }
     }
 }

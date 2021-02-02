@@ -1,9 +1,12 @@
 ﻿using Analyzer.Jira.Application.Configuration;
 using Atlassian.Jira;
 using Microsoft.Extensions.Options;
+using Nest;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Analyzer.Jira.Application.Services

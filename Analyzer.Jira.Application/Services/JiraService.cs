@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Analyzer.Jira.Application.Services
 {
+
     public class JiraService
     {
         private const int PARALLEL_DEGREE = 10;

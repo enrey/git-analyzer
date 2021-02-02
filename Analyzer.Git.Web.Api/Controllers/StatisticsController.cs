@@ -6,7 +6,6 @@ using Analyzer.Git.Web.Api.Dto;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Analyzer.Git.Web.Api.Controllers
 {
@@ -17,23 +16,18 @@ namespace Analyzer.Git.Web.Api.Controllers
     [ApiController]
     public class StatisticsController : ControllerBase
     {
-        private const int TIMEOUT_SECONDS = 60 * 60;
-
         private readonly IGitStatisticsService _gitStatisticsService;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
         /// <summary>
         /// Контроллер для раьоты со статистикой GIT репозиториев
         /// </summary>
         public StatisticsController(
             IGitStatisticsService gitStatisticsService,
-            IMapper mapper,
-            IMemoryCache cache)
+            IMapper mapper)
         {
             _gitStatisticsService = gitStatisticsService;
             _mapper = mapper;
-            _cache = cache;
         }
 
         /// <summary>
@@ -43,20 +37,13 @@ namespace Analyzer.Git.Web.Api.Controllers
         /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
         /// <returns></returns>
         [HttpGet("{startDate}/{endDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryStatisticsContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            return await _cache.GetOrCreateAsync("statistic" + startDate.DateTime.ToShortDateString() + "/" + endDate.DateTime.ToShortDateString(),
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
+            var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
 
-                    var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
-                    var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
-
-                    return Ok(result);
-                });
+            return Ok(result);
         }
 
         /// <summary>
@@ -100,6 +87,19 @@ namespace Analyzer.Git.Web.Api.Controllers
             return NoContent();
         }
 
+        [HttpPost("update-elastic")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        public IActionResult Update()
+        {
+            var statistics = _gitStatisticsService.GetAllRepositoriesStatisticsAsync(DateTime.Now.AddMonths(-1), DateTime.Now).Result;
+            var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
+
+            // _jiraElasticService.UpdateMonth();
+            throw new NotImplementedException();
+
+            return Ok();
+        }
+
         /// <summary>
         /// Оценки затраченного на работу времени
         /// </summary>
@@ -107,20 +107,13 @@ namespace Analyzer.Git.Web.Api.Controllers
         /// <param name="endDate"></param>
         /// <returns></returns>
         [HttpGet("work-estimates/{startDate}/{endDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryWorkEstimateContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRepositoriesWorkEstimate(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            return await _cache.GetOrCreateAsync("estimates" + startDate.DateTime.ToShortDateString() + "/" + endDate.DateTime.ToShortDateString(),
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var estimates = await _gitStatisticsService.GetWorkSessionsEstimate(startDate, endDate);
+            var result = _mapper.Map<IEnumerable<RepositoryWorkEstimateContract>>(estimates);
 
-                    var estimates = await _gitStatisticsService.GetWorkSessionsEstimate(startDate, endDate);
-                    var result = _mapper.Map<IEnumerable<RepositoryWorkEstimateContract>>(estimates);
-
-                    return Ok(result);
-                });
+            return Ok(result);
         }
     }
 }

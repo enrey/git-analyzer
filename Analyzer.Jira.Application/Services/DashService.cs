@@ -53,7 +53,7 @@ namespace Analyzer.Jira.Application.Services
                 DateTime? dateAnalysis = null;
 
                 dateClosed = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Закрыт")).LastOrDefault()?.CreatedDate;
-                dateApprove = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Утверждение")).LastOrDefault()?.CreatedDate;
+                dateApprove = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Утверждение DEV")).LastOrDefault()?.CreatedDate;
                 dateReadyForDev = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Готова для разработки")).LastOrDefault()?.CreatedDate;
                 //first
                 dateAnalysis = featureLogStatuses.Where(o => o.Items.Any(i => i.ToValue == "Аналитика")).FirstOrDefault()?.CreatedDate;
