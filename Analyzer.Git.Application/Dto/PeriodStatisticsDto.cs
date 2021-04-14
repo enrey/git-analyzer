@@ -9,6 +9,16 @@ namespace Analyzer.Git.Application.Dto
     public class PeriodStatisticsDto
     {
         /// <summary>
+        /// Репозиторий
+        /// </summary>
+        public string RepositoryName { get; set; }
+
+        /// <summary>
+        /// URL для UI
+        /// </summary>
+        public string WebUI { get; set; }
+
+        /// <summary>
         /// Дата за которую собрана статистика
         /// </summary>
         public DateTime Date { get; set; }

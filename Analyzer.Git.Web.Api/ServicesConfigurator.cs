@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Analyzer.Git.Application.Services.Statistics;
 using Analyzer.Git.Application.Configuration;
 using Analyzer.Git.Web.Api.Hosted;
 using Analyzer.Git.Web.Api.Mapper;
@@ -13,6 +12,7 @@ namespace Analyzer.Git.Web.Api
     {
         public static void RegisterServices(IServiceCollection services, IConfiguration configuration)
         {
+            services.AddTransient<GitElasticService>();
             services.AddTransient<IGitlabServiceClient, GitlabServiceClient>();
             services.AddTransient<IGitStatisticsService, GitStatisticsService>();
 
@@ -24,6 +24,7 @@ namespace Analyzer.Git.Web.Api
 
             services.AddAutoMapper(typeof(StatisticsMapperProfile));
             services.AddHostedService<UpdateRepositoriesHostedService>();
+            services.AddHostedService<ProducerHostingService>();            
         }
     }
 }

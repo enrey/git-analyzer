@@ -1,5 +1,5 @@
 ﻿using Analyzer.Git.Application.Configuration;
-using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Application.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System.Threading;

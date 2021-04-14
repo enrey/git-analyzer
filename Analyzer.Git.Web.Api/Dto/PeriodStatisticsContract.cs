@@ -8,6 +8,16 @@ namespace Analyzer.Git.Web.Api.Dto
     public class PeriodStatisticsContract
     {
         /// <summary>
+        /// Репозиторий
+        /// </summary>
+        public string RepositoryName { get; set; }
+
+        /// <summary>
+        /// UI для фронта
+        /// </summary>
+        public string WebUI { get; set; }
+        
+        /// <summary>
         /// Дата за которую собрана статистика
         /// </summary>
         public string Date { get; set; }

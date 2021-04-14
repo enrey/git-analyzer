@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Application.Services;
 
 namespace Analyzer.Git.IntegrationTests
 {

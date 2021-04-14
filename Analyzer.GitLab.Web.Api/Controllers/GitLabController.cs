@@ -20,19 +20,15 @@ namespace Analyzer.GitLab.Web.Api.Controllers
     [ApiController]
     public class GitLabController : ControllerBase
     {
-        private const int TIMEOUT_SECONDS = 60 * 60;
-
         private readonly IGitLabService _gitLabService;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
         /// <summary>
         /// Контроллер для работы с данными из GitLab
         /// </summary>
-        public GitLabController(IGitLabService gitLabService, IMapper mapper, IMemoryCache cache)
+        public GitLabController(IGitLabService gitLabService, IMapper mapper)
         {
             _gitLabService = gitLabService;
-            _cache = cache;
             _mapper = mapper;
         }
 
@@ -43,21 +39,14 @@ namespace Analyzer.GitLab.Web.Api.Controllers
         /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
         /// <returns></returns>
         [HttpGet("{startDate}/{endDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<UserMergeRequestsStatisicsContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMergeRequests(DateTime startDate, DateTime endDate)
         {
-            return await _cache.GetOrCreateAsync("statistic" + startDate.ToShortDateString() + "/" + endDate.ToShortDateString(),
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var dtos = await _gitLabService.GetMergeRequestsStatistics(startDate, endDate);
 
-                    var dtos = await _gitLabService.GetMergeRequestsStatistics(startDate, endDate);
+            var result = _mapper.Map<IEnumerable<UserMergeRequestsStatisicsContract>>(dtos);
 
-                    var result = _mapper.Map<IEnumerable<UserMergeRequestsStatisicsContract>>(dtos);
-
-                    return Ok(result);
-                });
+            return Ok(result);
         }
 
 
@@ -68,56 +57,36 @@ namespace Analyzer.GitLab.Web.Api.Controllers
         /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
         /// <returns></returns>
         [HttpGet("comments/{startDate}/{endDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<CommentsStatisicsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetMergeRequestsComments(DateTime startDate, DateTime endDate)
         {
-            return await _cache.GetOrCreateAsync("statisticComments" + startDate.ToShortDateString() + "/" + endDate.ToShortDateString(),
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var dtos = await _gitLabService.GetMergeRequestsCommentsStatistics(startDate, endDate);
 
-                    var dtos = await _gitLabService.GetMergeRequestsCommentsStatistics(startDate, endDate);
-
-                    return Ok(dtos);
-                });
+            return Ok(dtos);
         }
 
         /// <summary>
         /// Получение пользователей GitLab'а
         /// </summary>
         [HttpGet("gitlabUsers")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<UserMergeRequestsStatisicsContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetGitlabUsers()
         {
-            return await _cache.GetOrCreateAsync("statistic_users",
-                async cacheEntry =>
-                {
-                    cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var dtos = await _gitLabService.GetUsers();
 
-                    var dtos = await _gitLabService.GetUsers();
-
-                    return Ok(dtos);
-                });
+            return Ok(dtos);
         }
 
         /// <summary>
         /// Возвращает последние коммиты репозиториев GitLab'а
         /// </summary>
         [HttpGet("gitlab-repositories-commits")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryLastCommitDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetGitlabAllRepositoriesLastCommit()
         {
-            return await _cache.GetOrCreateAsync("gitlab-repos-commits", async cacheEntry =>
-            {
-                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var commits = await _gitLabService.GetRepositoriesLastCommit();
 
-                var commits = await _gitLabService.GetRepositoriesLastCommit();
-
-                return Ok(commits);
-            });
+            return Ok(commits);
         }
 
         /// <summary>
@@ -125,18 +94,12 @@ namespace Analyzer.GitLab.Web.Api.Controllers
         /// <param name="sinceDate">Начало периода активности в формате YYYY-MM-DD</param>
         /// </summary>
         [HttpGet("gitlab-active-repositories/{sinceDate}")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = TIMEOUT_SECONDS)]
         [ProducesResponseType(typeof(IEnumerable<RepositoryInfoDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetActiveRepositories(DateTime sinceDate)
         {
-            return await _cache.GetOrCreateAsync("active-gitlab-repos", async cacheEntry =>
-            {
-                cacheEntry.SlidingExpiration = TimeSpan.FromSeconds(TIMEOUT_SECONDS);
+            var repositories = await _gitLabService.GetActiveRepositories(sinceDate);
 
-                var repositories = await _gitLabService.GetActiveRepositories(sinceDate);
-
-                return Ok(repositories);
-            });
+            return Ok(repositories);
         }
     }
 }

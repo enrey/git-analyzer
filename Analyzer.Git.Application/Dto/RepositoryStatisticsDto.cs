@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Analyzer.Git.Application.Dto
 {
     /// <summary>
-    /// DTO статистики по репозиторию
+    /// DTO статистики по репозиторию    
     /// </summary>
+    [Obsolete("Похоже на ненужный класс")]
     public class RepositoryStatisticsDto
     {
         /// <summary>

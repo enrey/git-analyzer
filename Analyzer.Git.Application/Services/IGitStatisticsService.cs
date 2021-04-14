@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Analyzer.Git.Application.Services.Statistics
+namespace Analyzer.Git.Application.Services
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев

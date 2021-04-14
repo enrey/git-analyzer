@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Analyzer.Git.Application.Services.Statistics
+namespace Analyzer.Git.Application.Services
 {
     /// <summary>
     /// Сервис для получения статистики из GIT репозиториев
@@ -73,7 +73,7 @@ namespace Analyzer.Git.Application.Services.Statistics
                         {
                             RepositoryName = ri.Name,
                             WebUI = ri.WebUI,
-                            Periods = GetStatisticsByDates(ri.RepoPath, dates)
+                            Periods = GetStatisticsByDates(ri, dates)
                         };
 
                         lock (_locker)
@@ -479,17 +479,17 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// <summary>
         /// Получить посуточную статистику по переданным дням
         /// </summary>
-        private IEnumerable<PeriodStatisticsDto> GetStatisticsByDates(string repositoryPath, IEnumerable<DateTime> dates)
+        internal IEnumerable<PeriodStatisticsDto> GetStatisticsByDates(RepositoryParameters pars, IEnumerable<DateTime> dates)
         {
-            _logger.LogInformation($"Getting statistics started: \"{repositoryPath}\"");
+            _logger.LogInformation($"Getting statistics started: \"{pars.RepoPath}\"");
 
-            using var repo = new Repository(repositoryPath);
+            using var repo = new Repository(pars.RepoPath);
 
             var commits = GetCommits(repo, dates, false);
 
-            var result = dates.Select(date => GetDayStatistics(repo, commits, date)).ToList();
+            var result = dates.Select(date => GetDayStatistics(repo, pars.Name, pars.WebUI, commits, date)).ToList();
 
-            _logger.LogInformation($"Getting statistics ended: \"{repositoryPath}\"");
+            _logger.LogInformation($"Getting statistics ended: \"{pars.RepoPath}\"");
 
             return result;
         }
@@ -497,7 +497,7 @@ namespace Analyzer.Git.Application.Services.Statistics
         /// <summary>
         /// Получить статистику за день
         /// </summary>
-        private PeriodStatisticsDto GetDayStatistics(Repository repository, IEnumerable<Commit> filteredCommits, DateTime date)
+        private PeriodStatisticsDto GetDayStatistics(Repository repository, string repositoryName, string webUi, IEnumerable<Commit> filteredCommits, DateTime date)
         {
             var dayCommits = filteredCommits.Where(c => c.Author.When.Date == date).ToList();
 
@@ -544,6 +544,8 @@ namespace Analyzer.Git.Application.Services.Statistics
 
             return new PeriodStatisticsDto
             {
+                RepositoryName = repositoryName,
+                WebUI = webUi,
                 Date = date,
                 Statistics = statistics
             };

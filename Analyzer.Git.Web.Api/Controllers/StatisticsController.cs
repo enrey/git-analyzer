@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Analyzer.Git.Application.Services.Statistics;
+using Analyzer.Git.Application.Services;
 using Analyzer.Git.Web.Api.Dto;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +17,7 @@ namespace Analyzer.Git.Web.Api.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly IGitStatisticsService _gitStatisticsService;
+        private readonly GitElasticService _gitElasticService;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -24,9 +25,11 @@ namespace Analyzer.Git.Web.Api.Controllers
         /// </summary>
         public StatisticsController(
             IGitStatisticsService gitStatisticsService,
+            GitElasticService gitElasticService,
             IMapper mapper)
         {
             _gitStatisticsService = gitStatisticsService;
+            _gitElasticService = gitElasticService;
             _mapper = mapper;
         }
 
@@ -40,7 +43,10 @@ namespace Analyzer.Git.Web.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<RepositoryStatisticsContract>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
+            //var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
+
+            var statistics = _gitElasticService.GetInfo(startDate, endDate);
+            
             var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
 
             return Ok(result);
@@ -91,11 +97,7 @@ namespace Analyzer.Git.Web.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public IActionResult Update()
         {
-            var statistics = _gitStatisticsService.GetAllRepositoriesStatisticsAsync(DateTime.Now.AddMonths(-1), DateTime.Now).Result;
-            var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
-
-            // _jiraElasticService.UpdateMonth();
-            throw new NotImplementedException();
+             _gitElasticService.UpdateMonth();            
 
             return Ok();
         }

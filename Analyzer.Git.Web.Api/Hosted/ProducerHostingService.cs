@@ -1,36 +1,36 @@
-﻿using Analyzer.Jira.Application.Configuration;
-using Analyzer.Jira.Application.Services;
+﻿using Analyzer.Git.Application.Configuration;
+using Analyzer.Git.Application.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Analyzer.Jira.Web.Api.Hosted
+namespace Analyzer.Git.Web.Api.Hosted
 {
     /// <summary>
     /// Self-hosted сервис для обновления репозиториев
     /// </summary>
-    public class UpdateRepositoriesHostedService : IHostedService
+    public class ProducerHostingService : IHostedService
     {
         private Timer _timer;
-        private readonly JiraElasticService _jiraElasticService;
-        private readonly JiraConfig _jiraConfig;
-        private readonly ILogger<UpdateRepositoriesHostedService> _logger;
+        private readonly GitElasticService _gitElasticService;
+        private readonly StatisticsConfig _statisticsConfig;
+        private readonly ILogger<ProducerHostingService> _logger;
 
         /// <summary>
         /// Self-hosted сервис ETL в еластик
         /// </summary>
-        public UpdateRepositoriesHostedService(ILogger<UpdateRepositoriesHostedService> logger, JiraElasticService jiraElasticService, IOptionsMonitor<JiraConfig> jiraConfig)
+        public ProducerHostingService(ILogger<ProducerHostingService> logger, GitElasticService gitElasticService, IOptionsMonitor<StatisticsConfig> statisticsConfig)
         {
-            _jiraElasticService = jiraElasticService;
-            _jiraConfig = jiraConfig.CurrentValue;
+            _gitElasticService = gitElasticService;
+            _statisticsConfig = statisticsConfig.CurrentValue;
             _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var timeLag = 1000 * 60 * _jiraConfig.UpdatePeriodMinutes;
+            var timeLag = 1000 * 60 * _statisticsConfig.UpdatePeriodMinutes;
             _timer = new Timer(Update, null, timeLag, timeLag);
             return Task.CompletedTask;
         }
@@ -44,7 +44,7 @@ namespace Analyzer.Jira.Web.Api.Hosted
         private void Update(object state)
         {
             _logger.LogInformation("ETL to Elastic Started...");
-            _jiraElasticService.UpdateMonth();
+            _gitElasticService.UpdateMonth();
             _logger.LogInformation("ETL to Elastic Ended!");
         }
     }

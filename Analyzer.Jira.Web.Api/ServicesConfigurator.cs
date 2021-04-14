@@ -18,7 +18,7 @@ namespace JiraAnalyzer.Web.Api
             services.AddTransient<DashService>();
 
             services.Configure<JiraConfig>(configuration.GetSection(JIRA_CONFIG));
-            services.AddHostedService<UpdateRepositoriesHostedService>();
+            services.AddHostedService<ProducerHostingService>();
         }
     }
 }

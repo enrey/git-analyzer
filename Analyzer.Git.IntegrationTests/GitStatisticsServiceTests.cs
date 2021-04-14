@@ -3,7 +3,6 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Threading.Tasks;
-using Analyzer.Git.Application.Services.Statistics;
 using Analyzer.Git.Application.Configuration;
 using Microsoft.Extensions.Configuration;
 using System.IO;

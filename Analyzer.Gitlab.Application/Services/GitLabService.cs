@@ -6,6 +6,7 @@ using GitLabApiClient;
 using GitLabApiClient.Models.MergeRequests.Requests;
 using GitLabApiClient.Models.Projects.Requests;
 using GitLabApiClient.Models.Projects.Responses;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -25,14 +26,17 @@ namespace Analyzer.Git.Application.Services.GitLab
         private const int MAX_DEGREE_OF_PARALLELISM = 5;
         private const string TYPE_COMMENT = "DiffNote";
         private readonly GitLabConfig _gitLabConfig;
+        private readonly ILogger<GitLabService> _logger;
 
         /// <summary>
         /// Сервис для взаимодействия с GitLab
         /// </summary>
         public GitLabService(
-            IOptionsMonitor<GitLabConfig> gitLabOptionsMonitor)
+            IOptionsMonitor<GitLabConfig> gitLabOptionsMonitor,
+            ILogger<GitLabService> logger)
         {
             _gitLabConfig = gitLabOptionsMonitor.CurrentValue;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<CommentsStatisicsDto>> GetMergeRequestsCommentsStatistics(DateTime startDate, DateTime endDate)
@@ -56,11 +60,15 @@ namespace Analyzer.Git.Application.Services.GitLab
 
         private async Task<CommentsStatisicsDto> getItem(int userId, string username, string useremail, DateTime startDate, DateTime endDate)
         {
-            HttpClient cl = new HttpClient();
+            using HttpClient cl = new HttpClient();
+            
             // TODO: Убрать копипасту с gitlabclient
             cl.DefaultRequestHeaders.Add("PRIVATE-TOKEN", _gitLabConfig.PrivateToken);
 
-            var response = await cl.GetAsync(_gitLabConfig.ApiUrl + "/users/" + userId + "/events?after=" + startDate + "&per_page=1000");
+            var url = _gitLabConfig.ApiUrl + "/users/" + userId + "/events?after=" + startDate.ToString("dd.MM.yyyy") + "&per_page=1000";
+            _logger.LogInformation(url);
+
+            var response = await cl.GetAsync(url);
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
             dynamic results = JsonConvert.DeserializeObject<dynamic>(responseBody);
@@ -78,8 +86,6 @@ namespace Analyzer.Git.Application.Services.GitLab
                     }
                 }
             }
-
-            cl.Dispose();
 
             return new CommentsStatisicsDto
             {

@@ -1,5 +1,6 @@
 #pragma warning disable CS1591
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Analyzer.GitLab.Web.Api.Dto;
@@ -64,10 +65,19 @@ namespace Analyzer.GitLab.Web.Api
 
             app.UseAuthorization();
 
+            SetCulture();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static void SetCulture()
+        {
+            var cultureInfo = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
         }
     }
 }

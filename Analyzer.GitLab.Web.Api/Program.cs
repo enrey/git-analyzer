@@ -17,7 +17,7 @@ namespace Analyzer.GitLab.Web.Api
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
-                    logging.AddConsole();
+                    logging.AddConsole(o => o.TimestampFormat = "yyyy-MM-dd HH:mm:ss.F ");
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

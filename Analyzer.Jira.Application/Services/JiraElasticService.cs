@@ -60,8 +60,10 @@ namespace Analyzer.Jira.Application.Services
             {
                 var indexResponse = client.IndexDocument(a);
                 if (!indexResponse.IsValid)
-                {
+                {                    
                     _logger.LogError("Not valid document :(");
+                    _logger.LogError(indexResponse.OriginalException.ToString());
+                    _logger.LogError(indexResponse.DebugInformation.ToString());
                 }
             }
         }
