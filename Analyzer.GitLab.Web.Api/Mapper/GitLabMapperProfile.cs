@@ -1,6 +1,4 @@
-﻿using Analyzer.Git.Application.Dto.GitLab;
-using Analyzer.GitLab.Web.Api.Dto;
-using AutoMapper;
+﻿using AutoMapper;
 
 namespace Analyzer.GitLab.Web.Api.Mapper
 {
@@ -14,8 +12,6 @@ namespace Analyzer.GitLab.Web.Api.Mapper
         /// </summary>
         public GitLabMapperProfile()
         {
-            CreateMap<UserMergeRequestsStatisicsDto, UserMergeRequestsStatisicsContract>();
-            CreateMap<UserMergeRequestsStatisicsItemDto, UserMergeRequestsStatisicsItemContract>();
         }
     }
 }

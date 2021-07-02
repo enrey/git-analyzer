@@ -9,6 +9,7 @@ namespace JiraAnalyzer.Web.Api
     public class ServicesConfigurator
     {
         private const string JIRA_CONFIG = "JiraConfig";
+        private const string ELASTIC_CONFIG = "ElasticSearch";
 
         public static void RegisterServices(IServiceCollection services, IConfiguration configuration)
         {
@@ -18,6 +19,7 @@ namespace JiraAnalyzer.Web.Api
             services.AddTransient<DashService>();
 
             services.Configure<JiraConfig>(configuration.GetSection(JIRA_CONFIG));
+            services.Configure<ElasticConfig>(configuration.GetSection(ELASTIC_CONFIG));
             services.AddHostedService<ProducerHostingService>();
         }
     }

@@ -11,10 +11,10 @@ namespace Analyzer.Git.Web.Api.Mapper
     {
         public StatisticsMapperProfile()
         {
-            CreateMap<PersonStatisticsDto, PersonStatisticsContract>();
-            CreateMap<PeriodStatisticsDto, PeriodStatisticsContract>()
-                .ForMember(t => t.Date, o => o.MapFrom(s => s.Date.ToString("yyyy-MM-dd")));
-            CreateMap<RepositoryStatisticsDto, RepositoryStatisticsContract>();
+            //CreateMap<CommitStatisticsDto, PersonStatisticsContract>();
+            //CreateMap<PeriodStatisticsDto, PeriodStatisticsContract>()
+            //    .ForMember(t => t.Date, o => o.MapFrom(s => s.Date.ToString("yyyy-MM-dd")));
+            //CreateMap<RepositoryStatisticsDto, RepositoryStatisticsContract>();
 
             CreateMap<PersonWorkEstimateDto, PersonWorkEstimateContract>();
             CreateMap<RepositoryWorkEstimateDto, RepositoryWorkEstimateContract>();

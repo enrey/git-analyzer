@@ -3,6 +3,7 @@ using Analyzer.Git.Application.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,13 +16,13 @@ namespace Analyzer.Git.Web.Api.Hosted
     {
         private Timer _timer;
         private readonly GitElasticService _gitElasticService;
-        private readonly StatisticsConfig _statisticsConfig;
+        private readonly ElasticConfig _statisticsConfig;
         private readonly ILogger<ProducerHostingService> _logger;
 
         /// <summary>
         /// Self-hosted сервис ETL в еластик
         /// </summary>
-        public ProducerHostingService(ILogger<ProducerHostingService> logger, GitElasticService gitElasticService, IOptionsMonitor<StatisticsConfig> statisticsConfig)
+        public ProducerHostingService(ILogger<ProducerHostingService> logger, GitElasticService gitElasticService, IOptionsMonitor<ElasticConfig> statisticsConfig)
         {
             _gitElasticService = gitElasticService;
             _statisticsConfig = statisticsConfig.CurrentValue;
@@ -44,8 +45,16 @@ namespace Analyzer.Git.Web.Api.Hosted
         private void Update(object state)
         {
             _logger.LogInformation("ETL to Elastic Started...");
-            _gitElasticService.UpdateMonth();
-            _logger.LogInformation("ETL to Elastic Ended!");
+            try
+            {
+                _gitElasticService.UpdateMonth();
+                _logger.LogInformation("ETL to Elastic Ended.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "ETL to Elastic ERROR!");
+
+            }
         }
     }
 }

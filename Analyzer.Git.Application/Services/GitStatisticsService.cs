@@ -4,6 +4,7 @@ using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Analyzer.Git.Application.Services
     {
         private const int MAX_PARALLEL = 1;
         private readonly ILogger _logger;
-        private readonly StatisticsConfig _statisticsConfig;
+        private readonly ElasticConfig _statisticsConfig;
         private readonly RepositoriesConfig _repositoriesConfig;
         private readonly WorkEstimateConfig _workEstimateConfig;
         private readonly IGitlabServiceClient _gitlabServiceClient;
@@ -31,7 +32,7 @@ namespace Analyzer.Git.Application.Services
         /// </summary>
         public GitStatisticsService(
             ILogger<GitStatisticsService> logger,
-            IOptionsMonitor<StatisticsConfig> statisticsConfigMonitor,
+            IOptionsMonitor<ElasticConfig> statisticsConfigMonitor,
             IOptionsMonitor<RepositoriesConfig> repositoriesConfig,
             IOptionsMonitor<WorkEstimateConfig> workEstimateConfig,
             IGitlabServiceClient gitlabServiceClient
@@ -50,7 +51,7 @@ namespace Analyzer.Git.Application.Services
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
+        public async Task<IEnumerable<PeriodStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate)
         {
             var dates = GetDates(startDate, endDate);
             var allRepos = await GetAllRepositoriesParameters();
@@ -62,28 +63,25 @@ namespace Analyzer.Git.Application.Services
                 throw new Exception("Отсутствуют клонированные репозитории");
 
 
-            var result = new List<RepositoryStatisticsDto>();
+            var result = new List<PeriodStatisticsDto>();
 
             await Task.Run(() =>
             {
                 Parallel.ForEach(validRepos,
                     ri =>
                     {
-                        var repoStatistics = new RepositoryStatisticsDto
-                        {
-                            RepositoryName = ri.Name,
-                            WebUI = ri.WebUI,
-                            Periods = GetStatisticsByDates(ri, dates)
-                        };
+                        var repoStatistics = GetStatisticsByDates(ri, dates).ToList();
 
                         lock (_locker)
                         {
-                            result.Add(repoStatistics);
+                            result.AddRange(repoStatistics);
                         }
                     });
             });
 
-            return result.OrderBy(r => r.RepositoryName).ToList();
+            var res = result.OrderBy(r => r.RepositoryName).ToList();
+
+            return res;
         }
 
         /// <summary>
@@ -161,6 +159,11 @@ namespace Analyzer.Git.Application.Services
                     Credentials = defaultCreds
                 }).ToList();
 
+            _logger.LogInformation($"Total repos count: {repos.Count()}");
+
+
+            ConcurrentBag<string> toDelete = new ConcurrentBag<string>();
+
             await Task.Run(() =>
             {
                 Parallel.ForEach(reposInfo, new ParallelOptions { MaxDegreeOfParallelism = MAX_PARALLEL }, info =>
@@ -173,6 +176,7 @@ namespace Analyzer.Git.Application.Services
                         catch (Exception ex)
                         {
                             _logger.LogError($"Clonning error! Repository: \"{info.RepoUrl}\". Message: {ex.Message}");
+                            toDelete.Add(info.RepoPath);
                         }
                     else
                         try
@@ -182,13 +186,55 @@ namespace Analyzer.Git.Application.Services
                         catch (Exception ex)
                         {
                             _logger.LogError($"Pulling error! Repository: \"{info.RepoPath}\". Message: {ex.Message}");
+                            toDelete.Add(info.RepoPath);
                         }
                 });
             });
 
             _logger.LogInformation($"Updating repositories ended");
 
+            _logger.LogWarning($"Had errors, cleaning breaked folders... In next checkout it should be fine");
+            foreach (var repo in toDelete)
+            {
+                _logger.LogInformation($"Deleting {repo}...");
 
+                var directory = new DirectoryInfo(repo) { Attributes = FileAttributes.Normal };
+                foreach (var info in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
+                {
+                    info.Attributes = FileAttributes.Normal;
+                }
+                directory.Delete(true);
+            }
+            _logger.LogInformation($"Dir cleared. With next update it should be fine...");
+        }
+
+        private void ClearFolder(string folderName)
+        {
+            DirectoryInfo dir = new DirectoryInfo(folderName);
+
+
+            foreach (FileInfo fi in dir.GetFiles())
+            {
+                fi.Delete();
+            }
+
+            foreach (DirectoryInfo di in dir.GetDirectories())
+            {
+                ClearFolder(di.FullName);
+                di.Delete();
+            }
+        }
+
+        void SetAttributesNormal(DirectoryInfo dir)
+        {
+            foreach (var subDir in dir.GetDirectories())
+            {
+                SetAttributesNormal(subDir);
+            }
+            foreach (var file in dir.GetFiles())
+            {
+                file.Attributes = FileAttributes.Normal;
+            }
         }
 
         /// <summary>
@@ -509,44 +555,36 @@ namespace Analyzer.Git.Application.Services
                         {
                             commit.Id,
                             commit.Author.Name,
+                            commit.Author.When.LocalDateTime,
                             commit.Author.Email,
                             commit.Sha,
+                            commit.Message,
                             Added = change.LinesAdded,
                             Deleted = change.LinesDeleted,
                             Total = change.LinesAdded + change.LinesDeleted
                         })
-                     )
-                )
-                .GroupBy(r => new { r.Id, r.Name, r.Email })
-                .Select(g => new
-                {
-                    g.Key.Name,
-                    g.Key.Email,
-                    Shas = g.Select(o => o.Sha),
-                    Added = g.Sum(g => g.Added),
-                    Deleted = g.Sum(g => g.Deleted),
-                    Total = g.Sum(g => g.Total),
-                })
-                .GroupBy(r => new { r.Name, r.Email })
-                .Select(g => new PersonStatisticsDto
-                {
-                    Name = g.Key.Name,
-                    Email = g.Key.Email,
-                    Commits = g.Count(),
-                    Shas = g.SelectMany(o => o.Shas).Distinct().ToList(),
-                    Added = g.Sum(g => g.Added),
-                    Deleted = g.Sum(g => g.Deleted),
-                    Total = g.Sum(g => g.Total),
-                    CommitsChurnArray = g.Select(o => o.Total).ToList()
-                })
-                .OrderBy(r => r.Name)
-            .ToList();
+                   )
+              )
+              .GroupBy(r => new { r.Id, r.Name, r.LocalDateTime, r.Email, r.Sha, r.Message })
+              .Select(c => new CommitStatisticsDto
+              {
+                  CommitDate = c.Key.LocalDateTime,
+                  Name = c.Key.Name,
+                  Email = c.Key.Email,
+                  Sha = c.Key.Sha,
+                  Message = c.Key.Message,
+                  Added = c.Sum(g => g.Added),
+                  Deleted = c.Sum(g => g.Deleted),
+                  Total = c.Sum(g => g.Total),
+              })
+              .OrderBy(r => r.Name)
+              .ToList();
 
             return new PeriodStatisticsDto
             {
                 RepositoryName = repositoryName,
                 WebUI = webUi,
-                Date = date,
+                Date = date.ToString("yyyy-MM-dd"),
                 Statistics = statistics
             };
         }
@@ -574,8 +612,10 @@ namespace Analyzer.Git.Application.Services
         /// <returns></returns>
         private async Task<IEnumerable<RepositoryInfoConfig>> GetAllRepositories()
         {
+            var repoModifiedDate = DateTime.Now.AddMonths(-1);
+
             var allRepositories = new List<RepositoryInfoConfig>();
-            allRepositories.AddRange(await _gitlabServiceClient.GetAllReposFromApi(DateTime.Now.AddMonths(-1)));
+            allRepositories.AddRange(await _gitlabServiceClient.GetAllReposFromApi(repoModifiedDate));
             var apiReposUrls = allRepositories.Select(c => c.Url);
 
             allRepositories.AddRange(_repositoriesConfig.ReposInfo

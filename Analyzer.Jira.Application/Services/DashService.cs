@@ -1,5 +1,7 @@
-﻿using Analyzer.Jira.Application.Dto;
+﻿using Analyzer.Jira.Application.Configuration;
+using Analyzer.Jira.Application.Dto;
 using Atlassian.Jira;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,13 @@ namespace Analyzer.Jira.Application.Services
 {
     public class DashService
     {
+        private readonly JiraConfig _jiraConfig;
+
+        public DashService(IOptionsMonitor<JiraConfig> jiraConfig)
+        {
+            _jiraConfig = jiraConfig.CurrentValue;
+        }
+
         public IList<Info> GetDash(IList<IssueAndLogs> issues, List<JiraUser> users)
         {
             var infos = new List<Info>();
@@ -21,7 +30,7 @@ namespace Analyzer.Jira.Application.Services
                 {
                     continue;
                 }
-
+                
                 // Фильтруем историю изменения выкидывая лишнее
                 var featureLogStatuses = issueAndLogs.Logs.Where(o => o.Items.Any(i => i.FieldName == "status" || i.FieldName == "assignee")).ToList();
 
@@ -88,8 +97,10 @@ namespace Analyzer.Jira.Application.Services
                     OriginalEstimateHours = issue.TimeTrackingData.OriginalEstimateInSeconds.HasValue ? issue.TimeTrackingData.OriginalEstimateInSeconds.Value / 60 / 60 : 0,
                     Type = issue.Type.Name,
                     Number = issue.Key.Value,
+                    Url = $"{_jiraConfig.Host}/browse/{issue.Key.Value}",
                     Project = issue.Project,
                     Name = issue.Summary,
+                    DateCreated = issue.Created,
                     DateStartDev = dateStartDev,
                     DateEndDev = dateEndDev,
                     DateClosed = dateClosed,
@@ -97,7 +108,7 @@ namespace Analyzer.Jira.Application.Services
                     DateApprove = dateApprove,
                     ReadyForDev = dateReadyForDev,
                     DateAnalysis = dateAnalysis
-                });
+                }); ;
             }
 
             return infos;

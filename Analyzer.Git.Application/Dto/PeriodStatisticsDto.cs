@@ -21,11 +21,11 @@ namespace Analyzer.Git.Application.Dto
         /// <summary>
         /// Дата за которую собрана статистика
         /// </summary>
-        public DateTime Date { get; set; }
+        public string Date { get; set; } // .ToString("yyyy-MM-dd")
 
         /// <summary>
         /// Статистика по сотрудникам
         /// </summary>
-        public IEnumerable<PersonStatisticsDto> Statistics { get; set; }
+        public IEnumerable<CommitStatisticsDto> Statistics { get; set; }
     }
 }

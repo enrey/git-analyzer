@@ -16,7 +16,7 @@ namespace Analyzer.Git.Web.Api
             services.AddTransient<IGitlabServiceClient, GitlabServiceClient>();
             services.AddTransient<IGitStatisticsService, GitStatisticsService>();
 
-            services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
+            services.Configure<ElasticConfig>(configuration.GetSection("ElasticSearch"));
             services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
             services.Configure<GitLabConfig>(configuration.GetSection("GitLab"));

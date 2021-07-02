@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Analyzer.Git.Application.Dto.GitLab
 {
@@ -30,10 +31,5 @@ namespace Analyzer.Git.Application.Dto.GitLab
         public List<DateAndIdItem> OpenedDates { get; set; }
 
         public List<DateAndIdItem> MergedDates { get; set; }
-
-        /// <summary>
-        /// Репозиторий
-        /// </summary>
-        public IList<UserMergeRequestsStatisicsItemDto> Items { get; set; }
     }
 }

@@ -39,7 +39,7 @@ namespace Analyzer.Jira.Application.Services
             return Combine(issues);
         }
 
-        public IList<JiraUser> GetUsers()
+        public IList<User> GetUsers()
         {
             var users = _jiraLoader.GetAllUsersFromGroup();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Analyzer.Git.Application.Dto;
 using Analyzer.Git.Application.Services;
 using Analyzer.Git.Web.Api.Dto;
 using AutoMapper;
@@ -40,14 +41,10 @@ namespace Analyzer.Git.Web.Api.Controllers
         /// <param name="endDate">Дата окончания периода в формате YYYY-MM-DD</param>
         /// <returns></returns>
         [HttpGet("{startDate}/{endDate}")]
-        [ProducesResponseType(typeof(IEnumerable<RepositoryStatisticsContract>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<PersonStatisticsResultDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get(DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            //var statistics = await _gitStatisticsService.GetAllRepositoriesStatisticsAsync(startDate, endDate);
-
-            var statistics = _gitElasticService.GetInfo(startDate, endDate);
-            
-            var result = _mapper.Map<IEnumerable<RepositoryStatisticsContract>>(statistics);
+            var result = _gitElasticService.GetInfo(startDate, endDate);
 
             return Ok(result);
         }
@@ -93,6 +90,10 @@ namespace Analyzer.Git.Web.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Обновление данных в хранилище Elastic
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("update-elastic")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public IActionResult Update()

@@ -25,7 +25,7 @@ namespace Analyzer.Git.IntegrationTests
 
             var builder = GetConfig();
             var repoConfig = builder.GetService<IOptionsMonitor<RepositoriesConfig>>();
-            var statConfig = builder.GetService<IOptionsMonitor<StatisticsConfig>>();
+            var statConfig = builder.GetService<IOptionsMonitor<ElasticConfig>>();
             var estConfig = builder.GetService<IOptionsMonitor<WorkEstimateConfig>>();
             var _gitlabServiceClient = MockGitlabSrvice();
 
@@ -76,8 +76,7 @@ namespace Analyzer.Git.IntegrationTests
 
             var services = new ServiceCollection();
             services.Configure<RepositoriesConfig>(configuration.GetSection("Repositories"));
-            services.Configure<StatisticsConfig>(configuration.GetSection("Statistics"));
-            services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
+            services.Configure<ElasticConfig>(configuration.GetSection("ElasticSearch"));
             services.Configure<WorkEstimateConfig>(configuration.GetSection("WorkEstimate"));
             var builder = services.BuildServiceProvider();
 

@@ -48,7 +48,7 @@ namespace Analyzer.Jira.IntegrationTests
         public void TestBetween()
         {
             // Arrange
-            var jiraService = new JiraService(new JiraLoader(_jiraConfig), new DashService(), new LoggerMock());
+            var jiraService = new JiraService(new JiraLoader(_jiraConfig), new DashService(_jiraConfig), new LoggerMock());
 
             // Act
             var result = jiraService.GetJiraInfo(DateTimeOffset.Now.AddDays(-30), DateTimeOffset.Now);
@@ -57,8 +57,7 @@ namespace Analyzer.Jira.IntegrationTests
             var client = new ElasticClient(settings);
 
             client.DeleteByQuery<object>(del => del
-    .Query(q => q.QueryString(qs => qs.Query("*")))
-);
+                .Query(q => q.QueryString(qs => qs.Query("*"))));
 
             //var client = new ElasticClient();
             var r = client.Ping();

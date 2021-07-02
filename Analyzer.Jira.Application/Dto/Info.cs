@@ -2,6 +2,7 @@
 
 namespace Analyzer.Jira.Application.Dto
 {
+
     public class Info
     {
         public string AssigneeCurrent { get; set; }
@@ -18,20 +19,29 @@ namespace Analyzer.Jira.Application.Dto
 
         public int DaysBeforeTest { get; set; }
 
-        public DateTime? DateStartDev { get; set; }
-        public DateTime? DateEndDev { get; set; }
-        public DateTime? DateToTest { get; set; }
-        public DateTime? DateClosed { get; set; }
-        public DateTime? DateApprove { get; set; }
-        public DateTime? ReadyForDev { get; set; }
-        public DateTime? DateAnalysis { get; set; }
+        public DateTime? DateCreated { get; set; }
 
+        public DateTime? DateStartDev { get; set; }
+
+        public DateTime? DateEndDev { get; set; }
+
+        public DateTime? DateToTest { get; set; }
+
+        public DateTime? DateClosed { get; set; }
+
+        public DateTime? DateApprove { get; set; }
+
+        public DateTime? ReadyForDev { get; set; }
+
+        public DateTime? DateAnalysis { get; set; }
 
         public DateTime DaysDate { get; set; }
 
         public DateTime DaysBeforeTestDate { get; set; }
 
         public string Number { get; set; }
+
+        public string Url { get; set; }
 
         public string Type { get; set; }
 

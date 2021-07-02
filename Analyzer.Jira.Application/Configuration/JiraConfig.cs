@@ -12,10 +12,5 @@
         public string Pwd { get; set; }
 
         public string UserGroupName { get; set; }
-
-        public string ElasticSearchUrl { get; set; }
-
-        public int UpdatePeriodMinutes { get; set; }
-
     }
 }

@@ -16,7 +16,7 @@ namespace Analyzer.Git.Application.Services
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <returns></returns>
-        Task<IEnumerable<RepositoryStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate);
+        Task<IEnumerable<PeriodStatisticsDto>> GetAllRepositoriesStatisticsAsync(DateTimeOffset startDate, DateTimeOffset endDate);
 
         /// <summary>
         /// Обновление всех репозиториев

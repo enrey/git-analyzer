@@ -2,7 +2,7 @@
 
 namespace Analyzer.Git.Application.Configuration
 {
-    public class StatisticsConfig
+    public class ElasticConfig
     {
         public string ElasticSearchUrl { get; set; }
 

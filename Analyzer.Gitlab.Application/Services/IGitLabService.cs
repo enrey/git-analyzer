@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Analyzer.Git.Application.Services.GitLab
+namespace Analyzer.Gitlab.Application.Services
 {
     /// <summary>
     /// Сервис для взаимодействия с GitLab

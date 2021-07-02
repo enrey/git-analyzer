@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
-namespace Analyzer.Git.Web.Api.Dto
+namespace Analyzer.Git.Application.Dto
 {
     /// <summary>
-    /// Контракт статистики по сотруднику
+    /// DTO статистики по сотруднику
     /// </summary>
-    public class PersonStatisticsContract
+    public class CommitStatisticsDto
     {
         /// <summary>
         /// Имя сотрудника
@@ -17,12 +17,11 @@ namespace Analyzer.Git.Web.Api.Dto
         /// </summary>
         public string Email { get; set; }
 
-        /// <summary>
-        /// Количество коммитов
-        /// </summary>
-        public int Commits { get; set; }
+        public string Sha { get; set; }
 
-        public IList<string> Shas { get; set; }
+        public string Message { get; set; }
+
+        public DateTime CommitDate { get; set; }
 
         /// <summary>
         /// Количество удалений
@@ -38,7 +37,5 @@ namespace Analyzer.Git.Web.Api.Dto
         /// Всего
         /// </summary>
         public int Total { get; set; }
-
-        public List<int> CommitsChurnArray { get; set; }
     }
 }

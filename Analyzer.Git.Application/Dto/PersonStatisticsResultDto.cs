@@ -2,11 +2,23 @@
 
 namespace Analyzer.Git.Application.Dto
 {
-    /// <summary>
-    /// DTO статистики по сотруднику
-    /// </summary>
-    public class PersonStatisticsDto
+    public class PersonStatisticsResultDto
     {
+        /// <summary>
+        /// Репозиторий
+        /// </summary>
+        public string RepositoryName { get; set; }
+
+        /// <summary>
+        /// URL для UI
+        /// </summary>
+        public string WebUI { get; set; }
+
+        /// <summary>
+        /// Дата за которую собрана статистика
+        /// </summary>
+        public string Date { get; set; }    
+
         /// <summary>
         /// Имя сотрудника
         /// </summary>
@@ -20,9 +32,7 @@ namespace Analyzer.Git.Application.Dto
         /// <summary>
         /// Количество коммитов
         /// </summary>
-        public int Commits { get; set; }
-
-        public IList<string> Shas { get; set; }
+        public int CommitsCount { get; set; }
 
         /// <summary>
         /// Количество удалений
@@ -39,6 +49,6 @@ namespace Analyzer.Git.Application.Dto
         /// </summary>
         public int Total { get; set; }
 
-        public List<int> CommitsChurnArray { get; set; }
+        public List<PersonStatisticsCommitResultDto> CommitsArray { get; set; }
     }
 }

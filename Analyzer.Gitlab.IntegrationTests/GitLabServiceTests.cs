@@ -1,5 +1,5 @@
 ﻿using Analyzer.Git.Application.Configuration;
-using Analyzer.Git.Application.Services.GitLab;
+using Analyzer.Gitlab.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -30,7 +30,7 @@ namespace Analyzer.Gitlab.IntegrationTests
             var endDate = DateTime.Now;
 
             var gitlabConfig = GetConfig();
-            var service = new GitLabService(gitlabConfig);
+            var service = new GitLabService(gitlabConfig, null);
 
             // Act
             var result = await service.GetMergeRequestsCommentsStatistics(startDate, endDate);
@@ -47,7 +47,7 @@ namespace Analyzer.Gitlab.IntegrationTests
             var endDate = DateTime.Now;
 
             var gitlabConfig = GetConfig();
-            var service = new GitLabService(gitlabConfig);
+            var service = new GitLabService(gitlabConfig, null);
 
             // Act
             var result = await service.GetMergeRequestsStatistics(startDate, endDate);
@@ -63,7 +63,7 @@ namespace Analyzer.Gitlab.IntegrationTests
             var sinceDate = DateTime.Now.AddMonths(-1);
 
             var gitlabConfig = GetConfig();
-            var service = new GitLabService(gitlabConfig);
+            var service = new GitLabService(gitlabConfig, null);
 
             // Act
             var result = await service.GetActiveRepositories(sinceDate);

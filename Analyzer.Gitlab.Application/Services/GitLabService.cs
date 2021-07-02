@@ -16,7 +16,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Analyzer.Git.Application.Services.GitLab
+namespace Analyzer.Gitlab.Application.Services
 {
     /// <summary>
     /// Сервис для взаимодействия с GitLab
@@ -61,7 +61,7 @@ namespace Analyzer.Git.Application.Services.GitLab
         private async Task<CommentsStatisicsDto> getItem(int userId, string username, string useremail, DateTime startDate, DateTime endDate)
         {
             using HttpClient cl = new HttpClient();
-            
+
             // TODO: Убрать копипасту с gitlabclient
             cl.DefaultRequestHeaders.Add("PRIVATE-TOKEN", _gitLabConfig.PrivateToken);
 
@@ -79,7 +79,7 @@ namespace Analyzer.Git.Application.Services.GitLab
             {
                 if (a.target_type.ToString() == TYPE_COMMENT)
                 {
-                    var item = new CommentsStatisicsItemDto { Username = a.note.author.username, Dt = DateTime.Parse(a.note.created_at.ToString()), Comment = a.note.body.ToString() };
+                    var item = new CommentsStatisicsItemDto { /*Username = a.note.author.username, */Dt = DateTime.Parse(a.note.created_at.ToString()), Comment = a.note.body.ToString() };
                     if (item.Dt >= startDate && item.Dt <= endDate)
                     {
                         lst.Add(item);
@@ -91,7 +91,7 @@ namespace Analyzer.Git.Application.Services.GitLab
             {
                 Items = lst,
                 TotalComments = lst.Count,
-                Username = username,
+                //Username = username,
                 Email = useremail
             };
         }
@@ -130,7 +130,8 @@ namespace Analyzer.Git.Application.Services.GitLab
                 mr.CreatedAt,
                 MergedById = mr.MergedBy?.Id,
                 mr.MergedAt,
-                mr.Iid
+                mr.Iid,
+                mr.Title
             })
             .ToList();
 
@@ -142,7 +143,7 @@ namespace Analyzer.Git.Application.Services.GitLab
                     UserId = gr.Key.AuthorId,
                     gr.Key.ProjectId,
                     Created = gr.Count(),
-                    CreatedDates = gr.Select(x => new DateAndIdItem { Iid = x.Iid, Dt = x.CreatedAt }).ToList()
+                    CreatedDates = gr.Select(x => ( x.Iid, Dt: x.CreatedAt, x.Title )).ToList()
                 })
                 .ToList();
 
@@ -153,8 +154,8 @@ namespace Analyzer.Git.Application.Services.GitLab
                 {
                     UserId = gr.Key.MergedById.Value,
                     gr.Key.ProjectId,
-                    Merged = gr.Count(),
-                    MergedDates = gr.Select(x => new DateAndIdItem { Iid = x.Iid, Dt = x.MergedAt.Value }).ToList()
+                    Merged = gr.Count(),                    
+                    MergedDates = gr.Select(x => ( x.Iid, Dt : x.MergedAt.Value, x.Title )).ToList()
                 })
                 .ToList();
 
@@ -163,19 +164,19 @@ namespace Analyzer.Git.Application.Services.GitLab
                 {
                     cd.UserId,
                     cd.CreatedDates,
-                    MergedDates = new List<DateAndIdItem>(),
+                    MergedDates = new List<(int Iid, DateTime Dt, string Title)>(),
                     cd.ProjectId
                 })
                 .Concat(
                     mergeData.Select(md => new
                     {
                         md.UserId,
-                        CreatedDates = new List<DateAndIdItem>(),
+                        CreatedDates = new List<(int Iid, DateTime Dt, string Title)>(),
                         md.MergedDates,
                         md.ProjectId
                     })
                 )
-                .GroupBy(o => new { o.UserId, o.ProjectId })//.Distinct()
+                .GroupBy(o => new { o.UserId, o.ProjectId })
                 .Select(o => new
                 {
                     o.Key.UserId,
@@ -194,8 +195,8 @@ namespace Analyzer.Git.Application.Services.GitLab
                     p.UserId,
                     Created = creationData.FirstOrDefault(cd => cd.ProjectId == p.ProjectId && cd.UserId == p.UserId)?.Created ?? 0,
                     Merged = mergeData.FirstOrDefault(cd => cd.ProjectId == p.ProjectId && cd.UserId == p.UserId)?.Merged ?? 0,
-                    CreatedDates = p.CreatedDates,
-                    MergedDates = p.MergedDates
+                    p.CreatedDates,
+                    p.MergedDates
                 })
                 .Join(users, stat => stat.UserId, user => user.Id, (stat, user) => new
                 {
@@ -218,16 +219,15 @@ namespace Analyzer.Git.Application.Services.GitLab
                     OpenedDates = new { repo.Name, repo.Url, stat.CreatedDates },
                     MergedDates = new { repo.Name, repo.Url, stat.MergedDates }
                 })
-                .GroupBy(o => o.Email)
+                .GroupBy(o => new { o.Email , o.Username})
                 .Select(o => new UserMergeRequestsStatisicsDto
                 {
-                    Email = o.Key,
-                    Username = o.Select(i => i.Username).First(), // TODO: несколько реп может быть
-                    OpenedDates = o.Select(o => o.OpenedDates).SelectMany(_ => _.CreatedDates.Select(i => new DateAndIdItem { Dt = i.Dt, Url = _.Url + URL_SUFFIX + i.Iid, Iid = i.Iid, Repo = _.Name })).ToList(),
-                    MergedDates = o.Select(o => o.MergedDates).SelectMany(_ => _.MergedDates.Select(i => new DateAndIdItem { Dt = i.Dt, Url = _.Url + URL_SUFFIX + i.Iid, Iid = i.Iid, Repo = _.Name })).ToList(),
+                    Email = o.Key.Email,
+                    Username = o.Key.Username,
+                    OpenedDates = o.Select(o => o.OpenedDates).SelectMany(_ => _.CreatedDates.Select(i => new DateAndIdItem { Dt = i.Dt, Url = _.Url + URL_SUFFIX + i.Iid, Iid = i.Iid, Repo = _.Name, Title = i.Title })).ToList(),
+                    MergedDates = o.Select(o => o.MergedDates).SelectMany(_ => _.MergedDates.Select(i => new DateAndIdItem { Dt = i.Dt, Url = _.Url + URL_SUFFIX + i.Iid, Iid = i.Iid, Repo = _.Name, Title = i.Title })).ToList(),
                     OpenedTotal = o.Sum(i => i.Opened),
                     MergedTotal = o.Sum(i => i.Merged),
-                    Items = o.Select(i => new UserMergeRequestsStatisicsItemDto { Merged = i.Merged, Opened = i.Opened, RepositoryName = i.RepositoryName }).ToList()
                 })
                 .ToList();
 
@@ -290,7 +290,7 @@ namespace Analyzer.Git.Application.Services.GitLab
             };
 
             var projects = (await client.Projects.GetAsync(queryOptionsDelegate))
-                .Select(rp => new RepositoryInfoDto() 
+                .Select(rp => new RepositoryInfoDto()
                 {
                     WebUI = rp.WebUrl,
                     Url = rp.HttpUrlToRepo

@@ -3,7 +3,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using Analyzer.GitLab.Web.Api.Dto;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +31,7 @@ namespace Analyzer.GitLab.Web.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Git analyzer GitLab API", Version = "v1" });
 
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(UserMergeRequestsStatisicsContract).Assembly.GetName().Name}.xml"));
+                //c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(UserMergeRequestsStatisicsContract).Assembly.GetName().Name}.xml"));
             });
 
 

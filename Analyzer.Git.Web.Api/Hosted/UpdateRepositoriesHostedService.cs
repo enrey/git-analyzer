@@ -1,7 +1,9 @@
 ﻿using Analyzer.Git.Application.Configuration;
 using Analyzer.Git.Application.Services;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,16 +17,19 @@ namespace Analyzer.Git.Web.Api.Hosted
         private Timer _timer;
         private readonly IGitStatisticsService _gitStatisticsService;
         private readonly RepositoriesConfig _repositoriesConfig;
+        private readonly ILogger<UpdateRepositoriesHostedService> _logger;
 
         /// <summary>
         /// Self-hosted сервис для обновления репозиториев
         /// </summary>
         public UpdateRepositoriesHostedService(
             IGitStatisticsService gitStatisticsService,
-            IOptionsMonitor<RepositoriesConfig> repositoriesConfig)
+            IOptionsMonitor<RepositoriesConfig> repositoriesConfig,
+            ILogger<UpdateRepositoriesHostedService> logger)
         {
             _gitStatisticsService = gitStatisticsService;
             _repositoriesConfig = repositoriesConfig.CurrentValue;
+            _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -41,7 +46,16 @@ namespace Analyzer.Git.Web.Api.Hosted
 
         private void Update(object state)
         {
-            _gitStatisticsService.UpdateAllRepositories().Wait();
+            try
+            {
+                _logger.LogInformation("Update repo started...");
+                _gitStatisticsService.UpdateAllRepositories().Wait();
+                _logger.LogInformation("Update repo success.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UPDATE REPO FAILED");
+            }
         }
     }
 }

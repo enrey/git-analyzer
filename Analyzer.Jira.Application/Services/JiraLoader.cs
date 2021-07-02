@@ -1,4 +1,5 @@
 ﻿using Analyzer.Jira.Application.Configuration;
+using Analyzer.Jira.Application.Dto;
 using Atlassian.Jira;
 using Microsoft.Extensions.Options;
 using Nest;
@@ -85,11 +86,19 @@ namespace Analyzer.Jira.Application.Services
             return await _jiraClient.Issues.GetIssuesFromJqlAsync(query, startAt: skip, maxIssues: take);
         }
 
-        public IList<JiraUser> GetAllUsersFromGroup()
+        public IList<User> GetAllUsersFromGroup()
         {
             var task = GetUsersInGroupAsync();
             task.Wait();
-            return task.Result;
+
+            return task.Result.Select(o =>
+                    new User
+                    {
+                        Username = o.Username,
+                        Email = o.Email.ToLower(),
+                        DisplayName = o.DisplayName,
+                        Url = $"{_jiraConfig.Host}/secure/ViewProfile.jspa?name={o.Username}"
+                    }).ToList();
         }
 
         private async Task<IList<JiraUser>> GetUsersAsync()
